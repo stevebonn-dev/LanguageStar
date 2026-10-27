@@ -2,49 +2,48 @@
 <html lang="de" id="html-root">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Language Star+ | Gamified Vocabulary Trainer</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Orbitron & Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #f3f4f6; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: #070913; color: #f3f4f6; overflow-x: hidden; user-select: none; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
-        .glass-panel { background: rgba(17, 24, 39, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(55, 65, 81, 0.5); }
-        .neon-glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
-        .neon-glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
-        .neon-glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(99, 102, 241, 0.25); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+        .neon-glow { box-shadow: 0 0 25px rgba(99, 102, 241, 0.5); }
+        .neon-glow-green { box-shadow: 0 0 25px rgba(16, 185, 129, 0.5); }
+        .neon-glow-cyan { box-shadow: 0 0 25px rgba(6, 182, 212, 0.5); }
         .text-size-sm { font-size: 13px; }
         .text-size-md { font-size: 16px; }
         .text-size-lg { font-size: 19px; }
         .text-size-xl { font-size: 22px; }
-        .lowercase-input { text-transform: lowercase; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #070913; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
     </style>
 </head>
 <body id="body-root" class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white text-size-md">
 
     <!-- TOP HEADER -->
-    <header class="glass-panel sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-gray-800">
+    <header class="glass-panel sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-indigo-500/20">
         <div class="flex items-center space-x-3 cursor-pointer" onclick="app.showScreen('home')">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-cyan-400 flex items-center justify-center neon-glow">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-cyan-400 flex items-center justify-center neon-glow">
                 <span class="text-white font-orbitron font-bold text-xl">★</span>
             </div>
             <div>
-                <h1 class="font-orbitron font-bold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300">LANGUAGE STAR+</h1>
-                <p class="text-xs text-gray-400">German Base • Separate Meanings</p>
+                <h1 class="font-orbitron font-bold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-300 to-purple-400">LANGUAGE STAR+</h1>
+                <p class="text-xs text-gray-400">Cyber Vocabulary Trainer</p>
             </div>
         </div>
 
         <div class="flex items-center space-x-3">
-            <div id="sync-status" class="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-gray-800/80 border border-gray-700 text-xs text-gray-300">
+            <div id="sync-status" class="hidden md:flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-indigo-950/50 border border-indigo-500/30 text-xs text-indigo-300">
                 <span id="sync-indicator" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span id="sync-text">Lokal gespeichert</span>
             </div>
-            <button onclick="app.openSettingsModal()" class="p-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 transition-all" title="Einstellungen">⚙️</button>
+            <button onclick="app.openSettingsModal()" class="p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-slate-700 text-gray-300 transition-all" title="Einstellungen">⚙️</button>
             <button onclick="app.triggerGoogleDriveSync()" class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/50 text-indigo-300 text-sm font-medium transition-all neon-glow">
                 <span class="hidden sm:inline">Google Drive</span>
             </button>
@@ -55,24 +54,24 @@
     <main class="flex-grow max-w-5xl w-full mx-auto p-4 sm:p-6 my-4">
 
         <!-- INITIAL STARTUP MODAL -->
-        <div id="startup-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-            <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
+        <div id="startup-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+            <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/40 neon-glow">
                 <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-indigo-600/25 border border-indigo-500/40 rounded-2xl flex items-center justify-center mx-auto mb-3 text-indigo-400 text-2xl font-orbitron">★</div>
+                    <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-white text-2xl font-orbitron neon-glow">★</div>
                     <h2 class="font-orbitron font-bold text-xl text-white">Datenbank-Initialisierung</h2>
-                    <p class="text-sm text-gray-400 mt-1">Wie möchtest du starten?</p>
+                    <p class="text-sm text-gray-400 mt-1">Keine lokale oder Cloud-Datenbank gefunden. Wie möchtest du starten?</p>
                 </div>
                 <div class="space-y-3">
                     <button onclick="app.resolveStartup('cloud')" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-all neon-glow">Aus Google Drive wiederherstellen</button>
-                    <button onclick="app.resolveStartup('local')" class="w-full py-3 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium border border-gray-700">Lokal gespeicherten Stand laden</button>
-                    <button onclick="app.resolveStartup('fresh')" class="w-full py-3 px-4 rounded-xl bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white font-medium border border-gray-800">Von vorne beginnen (Beispiel-Kapitel)</button>
+                    <button onclick="app.resolveStartup('local')" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-gray-200 font-medium border border-slate-700">Lokal gespeicherten Stand laden</button>
+                    <button onclick="app.resolveStartup('fresh')" class="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-gray-400 hover:text-white font-medium border border-slate-800">Von vorne beginnen (Beispiel-Kapitel)</button>
                 </div>
             </div>
         </div>
 
         <!-- SCREEN 1: HOME / CHAPTER OVERVIEW -->
         <div id="screen-home" class="space-y-6">
-            <div class="glass-panel rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-500/20">
+            <div class="glass-panel rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-500/30">
                 <div>
                     <h2 class="font-orbitron font-bold text-2xl text-white">Kapitel- & Dateiverwaltung</h2>
                     <p class="text-sm text-gray-400 mt-1">Wähle ein Kapitel aus, teste Vokabeln oder verwalte separate Einträge.</p>
@@ -89,35 +88,35 @@
 
         <!-- SCREEN 2: CHAPTER EDITOR -->
         <div id="screen-editor" class="space-y-6 hidden">
-            <div class="glass-panel rounded-2xl p-6 border border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="glass-panel rounded-2xl p-6 border border-indigo-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <button onclick="app.showScreen('home')" class="text-xs text-indigo-400 hover:underline mb-1 block">&larr; Zurück zur Kapitelübersicht</button>
                     <h2 id="editor-chapter-title" class="font-orbitron font-bold text-2xl text-white">Kapitel Name</h2>
                     <p id="editor-chapter-subtitle" class="text-sm text-gray-400">Zielsprache: Englisch • 0 Vokabeln</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <button onclick="app.openRenameChapterModal()" class="px-3.5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-medium">Kapitel Umbenennen</button>
+                    <button onclick="app.openRenameChapterModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl text-xs font-medium">Umbenennen</button>
                     <button onclick="app.openAddVocabModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-all">+ Vokabel</button>
                     <button onclick="app.startTestSetup()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-medium transition-all neon-glow-green">Test starten</button>
                 </div>
             </div>
 
-            <div class="glass-panel rounded-2xl p-6 border border-gray-800">
-                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste</h3>
+            <div class="glass-panel rounded-2xl p-6 border border-indigo-500/30">
+                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste (Mehrere Bedeutungen separat)</h3>
                 <div id="vocab-list-container" class="space-y-3"></div>
             </div>
         </div>
 
         <!-- SCREEN 3: TEST SETUP -->
         <div id="screen-test-setup" class="space-y-6 hidden">
-            <div class="glass-panel rounded-2xl p-6 max-w-xl mx-auto border border-indigo-500/30 neon-glow">
+            <div class="glass-panel rounded-2xl p-6 max-w-xl mx-auto border border-indigo-500/40 neon-glow">
                 <h2 class="font-orbitron font-bold text-2xl text-white mb-2">Test-Konfiguration</h2>
                 <p class="text-sm text-gray-400 mb-6">Wähle Modus, Richtung und Timer.</p>
                 
                 <div class="space-y-5">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Test-Richtung</label>
-                        <select id="test-direction" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white">
+                        <select id="test-direction" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white">
                             <option value="de-to-target">Deutsch &rarr; Zielsprache</option>
                             <option value="target-to-de">Zielsprache &rarr; Deutsch</option>
                             <option value="mixed">Gemischt (Zufällig)</option>
@@ -126,15 +125,15 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Reihenfolge</label>
-                        <select id="test-order" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white">
+                        <select id="test-order" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white">
                             <option value="sequential">Sequenziell (Chronologisch)</option>
                             <option value="shuffle">Shuffle (Zufällig gemischt)</option>
                         </select>
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Zeitlimit pro Vokabel</label>
-                        <select id="test-timer" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Zeitlimit pro Bedeutung</label>
+                        <select id="test-timer" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white">
                             <option value="0">Aus (Unendlich)</option>
                             <option value="5">5 Sekunden</option>
                             <option value="10" selected>10 Sekunden</option>
@@ -143,7 +142,7 @@
                         </select>
                     </div>
 
-                    <div class="flex items-center justify-between p-4 bg-gray-900/60 rounded-xl border border-gray-800">
+                    <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800">
                         <div>
                             <span class="text-sm font-medium text-white block">Hangman-Modus</span>
                             <span class="text-xs text-gray-400">Jeder Fehler zeichnet den Hangman weiter.</span>
@@ -153,7 +152,7 @@
                 </div>
 
                 <div class="flex items-center justify-end space-x-3 mt-8">
-                    <button onclick="app.showScreen('editor')" class="px-5 py-2.5 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
+                    <button onclick="app.showScreen('editor')" class="px-5 py-2.5 rounded-xl bg-slate-800 text-gray-300 text-sm">Abbrechen</button>
                     <button onclick="app.launchTestSession()" class="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Test starten</button>
                 </div>
             </div>
@@ -161,30 +160,31 @@
 
         <!-- SCREEN 4: ACTIVE TEST -->
         <div id="screen-test-active" class="space-y-6 hidden max-w-2xl mx-auto">
-            <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border border-gray-800">
+            <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border border-indigo-500/30">
                 <span id="test-progress-text" class="text-xs font-orbitron text-indigo-400 font-bold uppercase">Frage 1 von 10</span>
-                <div id="timer-container" class="w-32 bg-gray-800 h-2.5 rounded-full overflow-hidden hidden">
+                <div id="timer-container" class="w-32 bg-slate-800 h-2.5 rounded-full overflow-hidden hidden">
                     <div id="timer-bar" class="bg-cyan-400 h-full w-full transition-all duration-1000"></div>
                 </div>
                 <div id="test-score-counter" class="text-xs font-medium text-emerald-400">Richtig: 0 | Falsch: 0</div>
             </div>
 
             <!-- Visual Hangman Canvas Box -->
-            <div id="hangman-box" class="glass-panel rounded-2xl p-4 text-center hidden border border-red-500/30">
+            <div id="hangman-box" class="glass-panel rounded-2xl p-4 text-center hidden border border-red-500/40">
                 <div class="font-orbitron text-red-400 text-xs font-bold mb-2">HANGMAN STATUS (Fehler: <span id="hangman-errors">0</span> / 6)</div>
-                <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800 inline-block">
+                <div class="bg-slate-950/80 p-3 rounded-xl border border-slate-800 inline-block">
                     <canvas id="hangman-canvas" width="160" height="140" class="block mx-auto"></canvas>
                 </div>
             </div>
 
-            <div class="glass-panel rounded-2xl p-8 text-center space-y-6 border border-indigo-500/25 relative overflow-hidden">
+            <div class="glass-panel rounded-2xl p-8 text-center space-y-6 border border-indigo-500/40 relative overflow-hidden neon-glow">
+                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-cyan-400 to-purple-500"></div>
                 <span id="test-direction-label" class="text-xs font-orbitron tracking-widest text-indigo-400 uppercase">Deutsch &rarr; Zielsprache</span>
                 <div class="py-4">
                     <h3 id="test-prompt-word" class="text-3xl font-bold font-orbitron text-white">Wort</h3>
-                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Übersetzung eingeben (Standard: Kleinbuchstaben):</p>
+                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib eine Bedeutung ein:</p>
                 </div>
                 <form id="test-answer-form" onsubmit="app.submitAnswer(event)" class="space-y-4">
-                    <input type="text" id="test-input-answer" autocomplete="off" autofocus placeholder="Übersetzung eingeben..." class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-5 py-4 text-white text-center text-lg lowercase-input focus:outline-none focus:border-indigo-500 neon-glow">
+                    <input type="text" id="test-input-answer" autocomplete="off" autofocus placeholder="Übersetzung..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
                     <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium neon-glow">Antwort prüfen</button>
                 </form>
                 <div id="test-feedback-area" class="hidden p-4 rounded-xl text-sm font-medium"></div>
@@ -193,13 +193,13 @@
 
         <!-- SCREEN 5: TEST SUMMARY -->
         <div id="screen-test-summary" class="space-y-6 hidden max-w-2xl mx-auto text-center">
-            <div class="glass-panel rounded-2xl p-8 border border-indigo-500/30 neon-glow space-y-6">
-                <div id="summary-grade-badge" class="w-20 h-20 bg-indigo-600/25 border border-indigo-500/40 rounded-3xl flex items-center justify-center mx-auto text-indigo-400 text-3xl font-orbitron">1</div>
+            <div class="glass-panel rounded-2xl p-8 border border-indigo-500/40 neon-glow space-y-6">
+                <div id="summary-grade-badge" class="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-cyan-400 border border-indigo-500/40 rounded-3xl flex items-center justify-center mx-auto text-white text-3xl font-orbitron neon-glow">1</div>
                 <div>
                     <h2 class="font-orbitron font-bold text-3xl text-white">Test Auswertung</h2>
                     <p id="summary-subtitle" class="text-sm text-gray-400 mt-1">Großartige Leistung!</p>
                 </div>
-                <div class="grid grid-cols-3 gap-4 py-4 border-y border-gray-800">
+                <div class="grid grid-cols-3 gap-4 py-4 border-y border-slate-800">
                     <div>
                         <span class="text-xs text-gray-400 block">Genauigkeit</span>
                         <span id="summary-accuracy" class="font-orbitron font-bold text-xl text-cyan-400">95%</span>
@@ -214,46 +214,63 @@
                     </div>
                 </div>
 
-                <div id="shooter-unlock-box" class="hidden p-5 rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-cyan-900/40 border border-cyan-500/50 neon-glow space-y-3">
+                <div id="shooter-unlock-box" class="hidden p-5 rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-cyan-900/40 border border-cyan-500/50 neon-glow-cyan space-y-3">
                     <div class="flex items-center justify-center space-x-2 text-cyan-300 font-orbitron font-bold text-lg">
                         <span>🚀</span>
                         <span>Sci-Fi Starship Shooter Freigeschaltet!</span>
                     </div>
-                    <button onclick="app.launchSciFiShooter()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-sm shadow-lg neon-glow">Arcade-Modus Starten</button>
+                    <button onclick="app.launchSciFiShooter()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-sm shadow-lg neon-glow-cyan">Arcade-Modus Starten</button>
                 </div>
 
                 <div class="flex items-center justify-center gap-3 pt-2">
-                    <button onclick="app.showScreen('home')" class="px-6 py-3 rounded-xl bg-gray-800 text-gray-300 text-sm">Übersicht</button>
+                    <button onclick="app.showScreen('home')" class="px-6 py-3 rounded-xl bg-slate-800 text-gray-300 text-sm hover:bg-slate-700">Übersicht</button>
                     <button id="btn-retry-mistakes" onclick="app.startMistakesFollowUp()" class="px-6 py-3 rounded-xl bg-indigo-600 text-white text-sm neon-glow hidden">Fehler wiederholen</button>
                 </div>
             </div>
         </div>
 
         <!-- SCREEN 6: SCI-FI SHOOTER -->
-        <div id="screen-shooter" class="space-y-4 hidden">
-            <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border border-cyan-500/40">
-                <span class="font-orbitron font-bold text-cyan-400 text-sm">★ STARSHIP DEFENDER | Score: <span id="shooter-score">0</span></span>
-                <button onclick="app.exitSciFiShooter()" class="px-4 py-1.5 rounded-xl bg-red-600/30 border border-red-500/50 text-red-300 text-xs">Beenden</button>
+        <div id="screen-shooter" class="space-y-4 hidden max-w-3xl mx-auto">
+            <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border border-cyan-500/40 neon-glow-cyan">
+                <div class="flex items-center space-x-4">
+                    <span class="font-orbitron font-bold text-cyan-400 text-sm">★ STARSHIP DEFENDER</span>
+                    <span class="text-xs text-gray-300">Score: <span id="shooter-score" class="text-white font-bold">0</span></span>
+                    <span class="text-xs text-gray-300">Schilder: <span id="shooter-health" class="text-emerald-400 font-bold">100%</span></span>
+                </div>
+                <button onclick="app.exitSciFiShooter()" class="px-4 py-1.5 rounded-xl bg-red-600/30 border border-red-500/50 text-red-300 text-xs hover:bg-red-600/50">Beenden</button>
             </div>
-            <div class="relative glass-panel rounded-2xl overflow-hidden border border-cyan-500/30 neon-glow flex justify-center items-center p-0">
-                <canvas id="shooter-canvas" width="800" height="450" class="w-full max-w-[800px] h-[400px] bg-black block cursor-crosshair"></canvas>
+            
+            <div class="relative glass-panel rounded-2xl overflow-hidden border border-cyan-500/50 neon-glow-cyan flex flex-col items-center p-0">
+                <canvas id="shooter-canvas" width="700" height="420" class="w-full max-w-[700px] h-[380px] bg-black block cursor-crosshair touch-none"></canvas>
+                
+                <div class="w-full bg-slate-950/95 p-4 border-t border-cyan-500/40 flex justify-between items-center">
+                    <div class="flex space-x-3">
+                        <button id="touch-left" class="w-16 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-2xl active:bg-cyan-600 active:text-white shadow-lg">&larr;</button>
+                        <button id="touch-right" class="w-16 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-2xl active:bg-cyan-600 active:text-white shadow-lg">&rarr;</button>
+                    </div>
+                    <div class="text-xs font-orbitron text-cyan-400 tracking-wider hidden sm:block">TACTICAL COMBAT DECK</div>
+                    <button id="touch-fire" class="w-32 h-14 bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border border-cyan-300 text-white rounded-2xl font-orbitron font-bold text-base neon-glow-cyan active:scale-95 transition-all shadow-xl flex items-center justify-center space-x-1.5">
+                        <span>FIRE</span>
+                        <span>💥</span>
+                    </button>
+                </div>
             </div>
         </div>
 
     </main>
 
-    <!-- MODALS: CHAPTER, RENAME, VOCAB (WITH SEPARATE MEANINGS), SETTINGS -->
-    <div id="modal-chapter" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
+    <!-- MODALS -->
+    <div id="modal-chapter" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/40 neon-glow">
             <h3 id="modal-chapter-title" class="font-orbitron font-bold text-xl text-white mb-4">Neues Kapitel erstellen</h3>
             <form id="form-chapter" onsubmit="app.saveChapter(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Kapitel Name</label>
-                    <input type="text" id="input-chapter-name" required placeholder="z.B. lektion 1: grundlagen" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="input-chapter-name" required placeholder="z.B. Lektion 1: Grundlagen" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Zielsprache</label>
-                    <select id="input-chapter-target-lang" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white">
+                    <select id="input-chapter-target-lang" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white">
                         <option value="Englisch">Englisch</option>
                         <option value="Spanisch">Spanisch</option>
                         <option value="Französisch">Französisch</option>
@@ -262,7 +279,7 @@
                     </select>
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-3">
-                    <button type="button" onclick="app.closeModal('modal-chapter')" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
+                    <button type="button" onclick="app.closeModal('modal-chapter')" class="px-4 py-2 rounded-xl bg-slate-800 text-gray-300 text-sm">Abbrechen</button>
                     <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Speichern</button>
                 </div>
             </form>
@@ -270,31 +287,31 @@
     </div>
 
     <!-- RENAME CHAPTER MODAL -->
-    <div id="modal-rename-chapter" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
+    <div id="modal-rename-chapter" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/40 neon-glow">
             <h3 class="font-orbitron font-bold text-xl text-white mb-4">Kapitel Umbenennen</h3>
             <form onsubmit="app.saveRenamedChapter(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Neuer Kapitel Name</label>
-                    <input type="text" id="input-rename-value" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="input-rename-value" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-3">
-                    <button type="button" onclick="app.closeModal('modal-rename-chapter')" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
+                    <button type="button" onclick="app.closeModal('modal-rename-chapter')" class="px-4 py-2 rounded-xl bg-slate-800 text-gray-300 text-sm">Abbrechen</button>
                     <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Umbenennen</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- VOCAB MODAL WITH SEPARATE MEANINGS INPUTS -->
-    <div id="modal-vocab" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow space-y-4 max-h-[90vh] overflow-y-auto">
+    <!-- VOCAB MODAL WITH SEPARATE MEANINGS -->
+    <div id="modal-vocab" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/40 neon-glow space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 id="modal-vocab-title" class="font-orbitron font-bold text-xl text-white">Vokabel hinzufügen</h3>
             <form id="form-vocab" onsubmit="app.saveVocab(event)" class="space-y-4">
                 <input type="hidden" id="input-vocab-id">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort (Base)</label>
-                    <input type="text" id="input-vocab-base" required placeholder="z.B. haus" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="input-vocab-base" required placeholder="z.B. Haus" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 
                 <div>
@@ -302,13 +319,11 @@
                         <label class="block text-sm font-medium text-gray-300">Bedeutungen in Zielsprache (Separate Felder)</label>
                         <button type="button" onclick="app.addMeaningField()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">+ Weitere Bedeutung</button>
                     </div>
-                    <div id="meanings-container" class="space-y-2">
-                        <!-- Dynamically populated meaning input fields -->
-                    </div>
+                    <div id="meanings-container" class="space-y-2"></div>
                 </div>
 
                 <div class="flex items-center justify-end space-x-3 pt-3">
-                    <button type="button" onclick="app.closeModal('modal-vocab')" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
+                    <button type="button" onclick="app.closeModal('modal-vocab')" class="px-4 py-2 rounded-xl bg-slate-800 text-gray-300 text-sm">Abbrechen</button>
                     <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Speichern</button>
                 </div>
             </form>
@@ -316,13 +331,13 @@
     </div>
 
     <!-- SETTINGS MODAL -->
-    <div id="modal-settings" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="glass-panel max-w-lg w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow space-y-5">
+    <div id="modal-settings" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-lg w-full rounded-2xl p-6 border border-indigo-500/40 neon-glow space-y-5">
             <h3 class="font-orbitron font-bold text-xl text-white">⚙️ App-Einstellungen</h3>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Schriftgröße</label>
-                    <select id="settings-font-size" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white">
+                    <select id="settings-font-size" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white">
                         <option value="text-size-sm">Klein</option>
                         <option value="text-size-md" selected>Normal</option>
                         <option value="text-size-lg">Groß</option>
@@ -331,18 +346,18 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Google Drive API Client ID / Key</label>
-                    <input type="text" id="settings-gdrive-key" placeholder="z.B. AIzaSyD..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm">
+                    <input type="text" id="settings-gdrive-key" placeholder="z.B. AIzaSyD..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white text-sm">
                 </div>
             </div>
             <div class="flex items-center justify-end space-x-3 pt-3">
-                <button type="button" onclick="app.closeModal('modal-settings')" class="px-5 py-2.5 rounded-xl bg-gray-800 text-gray-300 text-sm">Schließen</button>
+                <button type="button" onclick="app.closeModal('modal-settings')" class="px-5 py-2.5 rounded-xl bg-slate-800 text-gray-300 text-sm">Schließen</button>
                 <button type="button" onclick="app.saveSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Speichern</button>
             </div>
         </div>
     </div>
 
     <!-- FOOTER -->
-    <footer class="glass-panel py-4 px-6 text-center text-xs text-gray-500 border-t border-gray-800">
+    <footer class="glass-panel py-4 px-6 text-center text-xs text-gray-500 border-t border-indigo-500/20">
         Language Star+ &bull; Gamified Vocabulary Trainer &bull; All Chapters Stored Separately
     </footer>
 
@@ -385,8 +400,9 @@
                 this.currentChapterId = null;
                 this.activeTest = {
                     chapterId: null, direction: 'de-to-target', order: 'sequential', timerLimit: 10,
-                    hangmanEnabled: false, questions: [], currentIndex: 0, correctCount: 0, wrongCount: 0,
-                    wrongVocabList: [], currentTimerInterval: null, timeLeft: 0, hangmanErrors: 0
+                    hangmanEnabled: false, testQueue: [], currentIndex: 0,
+                    correctCount: 0, wrongCount: 0, wrongVocabList: [], currentTimerInterval: null,
+                    timeLeft: 0, hangmanErrors: 0
                 };
                 this.shooterGame = null;
                 this.initApp();
@@ -397,9 +413,12 @@
                 if (localData) {
                     try {
                         this.db = JSON.parse(localData);
-                        if (!this.db.chapters) this.db.chapters = [];
+                        if (!this.db.chapters || this.db.chapters.length === 0) {
+                            this.showStartupModal();
+                            return;
+                        }
                         this.applySettings();
-                        this.renderChapters();
+                        this.showScreen('home');
                         this.updateSyncStatus("Lokal gespeichert");
                     } catch(e) {
                         this.showStartupModal();
@@ -423,18 +442,18 @@
                         chapters: [
                             {
                                 id: 'chap_' + Date.now() + '_1',
-                                title: 'lektion 1: grundlagen',
+                                title: 'Lektion 1: Grundlagen',
                                 targetLanguage: 'Englisch',
                                 createdAt: new Date().toISOString(),
                                 vocabularies: [
-                                    { id: 'v_1', baseWord: 'haus', targetMeanings: ['house', 'home'] },
-                                    { id: 'v_2', baseWord: 'auto', targetMeanings: ['car', 'automobile'] }
+                                    { id: 'v_1', baseWord: 'Haus', targetMeanings: ['house', 'home'] },
+                                    { id: 'v_2', baseWord: 'Auto', targetMeanings: ['car', 'automobile'] }
                                 ]
                             }
                         ]
                     };
                     this.persist();
-                    this.renderChapters();
+                    this.showScreen('home');
                 }
             }
 
@@ -452,7 +471,7 @@
                     if (isInitial && !cloudBackup) {
                         this.persist();
                         this.updateSyncStatus("Cloud leer - Lokal initialisiert");
-                        this.renderChapters();
+                        this.showScreen('home');
                         return;
                     }
                     if (!cloudBackup || isInitial) {
@@ -463,7 +482,7 @@
                     }
                     this.db.lastSynced = new Date().toISOString();
                     this.updateSyncStatus("Google Drive Sync OK");
-                    this.renderChapters();
+                    this.showScreen('home');
                     if (!isInitial) alert("Google Drive Synchronisation erfolgreich!");
                 }, 800);
             }
@@ -487,7 +506,7 @@
 
                 this.db.chapters.forEach(chap => {
                     const card = document.createElement('div');
-                    card.className = "glass-panel rounded-2xl p-6 border border-gray-800 hover:border-indigo-500/50 transition-all flex flex-col justify-between space-y-4";
+                    card.className = "glass-panel rounded-2xl p-6 border border-indigo-500/30 hover:border-indigo-500/60 transition-all flex flex-col justify-between space-y-4";
                     card.innerHTML = `
                         <div>
                             <div class="flex items-center justify-between mb-2">
@@ -496,7 +515,7 @@
                             </div>
                             <h3 class="font-orbitron font-bold text-lg text-white">${chap.title}</h3>
                         </div>
-                        <div class="flex items-center justify-between pt-2 border-t border-gray-800">
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-800">
                             <button onclick="app.openChapter('${chap.id}')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">&rarr; Öffnen & Testen</button>
                             <div class="flex items-center space-x-2">
                                 <button onclick="app.currentChapterId='${chap.id}'; app.openRenameChapterModal();" class="p-2 text-gray-400 hover:text-white" title="Umbenennen">✏️</button>
@@ -524,14 +543,14 @@
                 } else {
                     chap.vocabularies.forEach(vocab => {
                         const item = document.createElement('div');
-                        item.className = "p-4 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-between";
+                        item.className = "p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between";
                         item.innerHTML = `
                             <div>
                                 <span class="font-bold text-white">${vocab.baseWord}</span>
                                 <span class="text-xs text-gray-400 block mt-0.5">Bedeutungen: ${vocab.targetMeanings.join(', ')}</span>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="app.openEditVocabModal('${vocab.id}')" class="px-3 py-1 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-gray-300">Bearbeiten</button>
+                                <button onclick="app.openEditVocabModal('${vocab.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-gray-300">Bearbeiten</button>
                                 <button onclick="app.deleteVocab('${vocab.id}')" class="px-3 py-1 rounded-lg bg-red-900/30 hover:bg-red-900/50 text-xs text-red-300">Löschen</button>
                             </div>
                         `;
@@ -557,7 +576,7 @@
 
             saveRenamedChapter(event) {
                 event.preventDefault();
-                const newName = document.getElementById('input-rename-value').value.trim().toLowerCase();
+                const newName = document.getElementById('input-rename-value').value.trim();
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
                 if (chap) {
                     chap.title = newName;
@@ -569,7 +588,7 @@
 
             saveChapter(event) {
                 event.preventDefault();
-                const name = document.getElementById('input-chapter-name').value.trim().toLowerCase();
+                const name = document.getElementById('input-chapter-name').value.trim();
                 const targetLang = document.getElementById('input-chapter-target-lang').value;
 
                 const newChap = {
@@ -599,7 +618,7 @@
                 document.getElementById('form-vocab').reset();
                 document.getElementById('input-vocab-id').value = '';
                 document.getElementById('meanings-container').innerHTML = '';
-                this.addMeaningField(); // Add initial field
+                this.addMeaningField();
                 document.getElementById('modal-vocab').classList.remove('hidden');
             }
 
@@ -624,7 +643,7 @@
                 const div = document.createElement('div');
                 div.className = "flex items-center space-x-2";
                 div.innerHTML = `
-                    <input type="text" value="${value}" placeholder="z.B. house" required class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white lowercase-input focus:outline-none focus:border-indigo-500 meaning-input">
+                    <input type="text" value="${value}" placeholder="z.B. house" required class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 meaning-input">
                     <button type="button" onclick="this.parentElement.remove()" class="p-2 bg-red-900/30 hover:bg-red-900/50 text-red-300 rounded-xl text-xs">✕</button>
                 `;
                 container.appendChild(div);
@@ -633,12 +652,12 @@
             saveVocab(event) {
                 event.preventDefault();
                 const vocabId = document.getElementById('input-vocab-id').value;
-                const baseWord = document.getElementById('input-vocab-base').value.trim().toLowerCase();
+                const baseWord = document.getElementById('input-vocab-base').value.trim();
                 
                 const meaningInputs = document.querySelectorAll('.meaning-input');
                 let targetMeanings = [];
                 meaningInputs.forEach(input => {
-                    const val = input.value.trim().toLowerCase();
+                    const val = input.value.trim();
                     if (val.length > 0) targetMeanings.push(val);
                 });
 
@@ -701,14 +720,32 @@
                 let vocabsToTest = subsetVocabs ? [...subsetVocabs] : [...chap.vocabularies];
                 if (order === 'shuffle') vocabsToTest.sort(() => Math.random() - 0.5);
 
+                // Build a flattened test queue where every single meaning of each vocabulary gets its own prompt step
+                let testQueue = [];
+                vocabsToTest.forEach(vocab => {
+                    vocab.targetMeanings.forEach((meaning, mIndex) => {
+                        testQueue.push({
+                            vocabId: vocab.id,
+                            baseWord: vocab.baseWord,
+                            targetMeanings: vocab.targetMeanings,
+                            targetMeaningIndex: mIndex,
+                            expectedMeaning: meaning
+                        });
+                    });
+                });
+
+                if (order === 'shuffle') testQueue.sort(() => Math.random() - 0.5);
+
                 this.activeTest = {
                     chapterId: this.currentChapterId, direction, order, timerLimit, hangmanEnabled,
-                    questions: vocabsToTest, currentIndex: 0, correctCount: 0, wrongCount: 0,
-                    wrongVocabList: [], currentTimerInterval: null, timeLeft: timerLimit, hangmanErrors: 0
+                    testQueue: testQueue, currentIndex: 0,
+                    correctCount: 0, wrongCount: 0, wrongVocabList: [], currentTimerInterval: null,
+                    timeLeft: timerLimit, hangmanErrors: 0
                 };
 
                 if (hangmanEnabled) {
                     document.getElementById('hangman-box').classList.remove('hidden');
+                    document.getElementById('hangman-errors').innerText = '0';
                     this.drawHangman(0);
                 } else {
                     document.getElementById('hangman-box').classList.add('hidden');
@@ -722,21 +759,22 @@
             }
 
             loadTestQuestion() {
-                if (this.activeTest.currentIndex >= this.activeTest.questions.length) {
+                if (this.activeTest.currentIndex >= this.activeTest.testQueue.length) {
                     this.finishTestSession();
                     return;
                 }
 
-                const vocab = this.activeTest.questions[this.activeTest.currentIndex];
-                const total = this.activeTest.questions.length;
+                const item = this.activeTest.testQueue[this.activeTest.currentIndex];
+                const total = this.activeTest.testQueue.length;
+                
                 document.getElementById('test-progress-text').innerText = `Frage ${this.activeTest.currentIndex + 1} von ${total}`;
                 document.getElementById('test-score-counter').innerText = `Richtig: ${this.activeTest.correctCount} | Falsch: ${this.activeTest.wrongCount}`;
 
                 let chap = this.db.chapters.find(c => c.id === this.currentChapterId);
                 let dir = this.activeTest.direction === 'mixed' ? (Math.random() > 0.5 ? 'de-to-target' : 'target-to-de') : this.activeTest.direction;
 
-                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? vocab.baseWord : vocab.targetMeanings[0];
-                document.getElementById('test-sub-prompt').innerText = (dir === 'de-to-target') ? `Übersetze ins ${chap.targetLanguage}` : `Übersetze ins Deutsche`;
+                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? item.baseWord : item.expectedMeaning;
+                document.getElementById('test-sub-prompt').innerText = (dir === 'de-to-target') ? `Übersetze ins ${chap.targetLanguage} (Bedeutung ${item.targetMeaningIndex + 1} von ${item.targetMeanings.length})` : `Übersetze ins Deutsche`;
                 document.getElementById('test-direction-label').innerText = (dir === 'de-to-target') ? `Deutsch &rarr; ${chap.targetLanguage}` : `${chap.targetLanguage} &rarr; Deutsch`;
 
                 document.getElementById('test-input-answer').value = '';
@@ -763,37 +801,48 @@
 
             handleTimeOut() {
                 audioFX.error();
-                const vocab = this.activeTest.questions[this.activeTest.currentIndex];
+                const item = this.activeTest.testQueue[this.activeTest.currentIndex];
                 this.activeTest.wrongCount++;
-                if (!this.activeTest.wrongVocabList.some(v => v.id === vocab.id)) this.activeTest.wrongVocabList.push(vocab);
+                
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                const fullVocab = chap.vocabularies.find(v => v.id === item.vocabId);
+                if (fullVocab && !this.activeTest.wrongVocabList.some(v => v.id === fullVocab.id)) {
+                    this.activeTest.wrongVocabList.push(fullVocab);
+                }
 
                 if (this.activeTest.hangmanEnabled) {
-                    this.activeTest.hangmanErrors++;
+                    this.activeTest.hangmanErrors = Math.min(6, this.activeTest.hangmanErrors + 1);
+                    document.getElementById('hangman-errors').innerText = this.activeTest.hangmanErrors;
                     this.drawHangman(this.activeTest.hangmanErrors);
                     if (this.activeTest.hangmanErrors >= 6) { this.failTestByHangman(); return; }
                 }
 
                 const fb = document.getElementById('test-feedback-area');
                 fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Korrekt: ${vocab.targetMeanings.join(', ')}`;
+                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Korrekte Bedeutung: <strong>${item.expectedMeaning}</strong>`;
                 fb.classList.remove('hidden');
 
-                setTimeout(() => { this.activeTest.currentIndex++; this.loadTestQuestion(); }, 2500);
+                setTimeout(() => {
+                    this.activeTest.currentIndex++;
+                    this.loadTestQuestion();
+                }, 2500);
             }
 
             submitAnswer(event) {
                 event.preventDefault();
                 if (this.activeTest.currentTimerInterval) clearInterval(this.activeTest.currentTimerInterval);
 
-                const inputVal = document.getElementById('test-input-answer').value.trim().toLowerCase();
-                const vocab = this.activeTest.questions[this.activeTest.currentIndex];
+                const inputVal = document.getElementById('test-input-answer').value.trim();
+                const item = this.activeTest.testQueue[this.activeTest.currentIndex];
                 const dir = this.activeTest.direction === 'mixed' ? 'de-to-target' : this.activeTest.direction;
 
                 const isCorrect = (dir === 'de-to-target') 
-                    ? vocab.targetMeanings.some(m => m.trim().toLowerCase() === inputVal) 
-                    : (vocab.baseWord.trim().toLowerCase() === inputVal);
+                    ? (inputVal.toLowerCase() === item.expectedMeaning.trim().toLowerCase())
+                    : (inputVal.toLowerCase() === item.baseWord.trim().toLowerCase());
                 
                 const fb = document.getElementById('test-feedback-area');
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                const fullVocab = chap.vocabularies.find(v => v.id === item.vocabId);
 
                 if (isCorrect) {
                     audioFX.success();
@@ -801,22 +850,31 @@
                     fb.className = "p-4 rounded-xl text-sm font-medium bg-emerald-900/30 border border-emerald-500/50 text-emerald-300";
                     fb.innerHTML = `<strong>Richtig!</strong> Ausgezeichnet.`;
                     fb.classList.remove('hidden');
-                    setTimeout(() => { this.activeTest.currentIndex++; this.loadTestQuestion(); }, 1200);
+                    setTimeout(() => {
+                        this.activeTest.currentIndex++;
+                        this.loadTestQuestion();
+                    }, 1200);
                 } else {
                     audioFX.error();
                     this.activeTest.wrongCount++;
-                    if (!this.activeTest.wrongVocabList.some(v => v.id === vocab.id)) this.activeTest.wrongVocabList.push(vocab);
+                    if (fullVocab && !this.activeTest.wrongVocabList.some(v => v.id === fullVocab.id)) {
+                        this.activeTest.wrongVocabList.push(fullVocab);
+                    }
 
                     if (this.activeTest.hangmanEnabled) {
-                        this.activeTest.hangmanErrors++;
+                        this.activeTest.hangmanErrors = Math.min(6, this.activeTest.hangmanErrors + 1);
+                        document.getElementById('hangman-errors').innerText = this.activeTest.hangmanErrors;
                         this.drawHangman(this.activeTest.hangmanErrors);
                         if (this.activeTest.hangmanErrors >= 6) { this.failTestByHangman(); return; }
                     }
 
                     fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                    fb.innerHTML = `<strong>Falsch!</strong> Richtige Antwort(en): <strong>${vocab.targetMeanings.join(', ')}</strong>`;
+                    fb.innerHTML = `<strong>Falsch!</strong> Gesuchte Bedeutung war: <strong>${item.expectedMeaning}</strong> (Alle: ${item.targetMeanings.join(', ')})`;
                     fb.classList.remove('hidden');
-                    setTimeout(() => { this.activeTest.currentIndex++; this.loadTestQuestion(); }, 3000);
+                    setTimeout(() => {
+                        this.activeTest.currentIndex++;
+                        this.loadTestQuestion();
+                    }, 3000);
                 }
             }
 
@@ -828,6 +886,7 @@
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 3;
 
+                // Gallows base
                 ctx.beginPath();
                 ctx.moveTo(20, 130); ctx.lineTo(100, 130);
                 ctx.moveTo(40, 130); ctx.lineTo(40, 15);
@@ -835,12 +894,13 @@
                 ctx.lineTo(95, 35);
                 ctx.stroke();
 
-                if (errors >= 1) { ctx.beginPath(); ctx.arc(95, 48, 12, 0, Math.PI * 2); ctx.stroke(); }
-                if (errors >= 2) { ctx.beginPath(); ctx.moveTo(95, 60); ctx.lineTo(95, 95); ctx.stroke(); }
-                if (errors >= 3) { ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(75, 85); ctx.stroke(); }
-                if (errors >= 4) { ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(115, 85); ctx.stroke(); }
-                if (errors >= 5) { ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(80, 120); ctx.stroke(); }
-                if (errors >= 6) { ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(110, 120); ctx.stroke(); }
+                // Body parts based on error count
+                if (errors >= 1) { ctx.beginPath(); ctx.arc(95, 48, 12, 0, Math.PI * 2); ctx.stroke(); } // Head
+                if (errors >= 2) { ctx.beginPath(); ctx.moveTo(95, 60); ctx.lineTo(95, 95); ctx.stroke(); } // Body
+                if (errors >= 3) { ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(75, 85); ctx.stroke(); } // Left arm
+                if (errors >= 4) { ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(115, 85); ctx.stroke(); } // Right arm
+                if (errors >= 5) { ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(80, 120); ctx.stroke(); } // Left leg
+                if (errors >= 6) { ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(110, 120); ctx.stroke(); } // Right leg
             }
 
             failTestByHangman() {
@@ -876,73 +936,171 @@
                 const canvas = document.getElementById('shooter-canvas');
                 const ctx = canvas.getContext('2d');
 
-                this.shooterGame = { active: true, score: 0, health: 100, ship: { x: 400, y: 380, speed: 6 }, lasers: [], enemies: [], keys: {} };
+                this.shooterGame = {
+                    active: true, score: 0, health: 100,
+                    ship: { x: 350, y: 320, speed: 7 },
+                    lasers: [], enemies: [], particles: [],
+                    keys: {}, touchState: { left: false, right: false }
+                };
 
-                window.onkeydown = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = true; if (e.code === 'Space') { e.preventDefault(); this.fireLaser(); } };
+                window.onkeydown = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = true; if (e.code === 'Space') { e.preventDefault(); this.fireShooterLaser(); } };
                 window.onkeyup = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = false; };
+
                 canvas.onmousemove = (e) => {
                     const rect = canvas.getBoundingClientRect();
-                    if (this.shooterGame) this.shooterGame.ship.x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    if (this.shooterGame) {
+                        this.shooterGame.ship.x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    }
                 };
+
+                canvas.ontouchmove = (e) => {
+                    e.preventDefault();
+                    const rect = canvas.getBoundingClientRect();
+                    if (e.touches.length > 0 && this.shooterGame) {
+                        this.shooterGame.ship.x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width);
+                    }
+                };
+
+                const btnLeft = document.getElementById('touch-left');
+                const btnRight = document.getElementById('touch-right');
+                const btnFire = document.getElementById('touch-fire');
+
+                btnLeft.ontouchstart = (e) => { e.preventDefault(); this.shooterGame.touchState.left = true; };
+                btnLeft.ontouchend = () => { this.shooterGame.touchState.left = false; };
+                btnRight.ontouchstart = (e) => { e.preventDefault(); this.shooterGame.touchState.right = true; };
+                btnRight.ontouchend = () => { this.shooterGame.touchState.right = false; };
+                btnFire.ontouchstart = (e) => { e.preventDefault(); this.fireShooterLaser(); };
+                btnFire.onclick = () => { this.fireShooterLaser(); };
 
                 let enemyTimer = 0;
                 const loop = () => {
                     if (!this.shooterGame || !this.shooterGame.active) return;
                     const g = this.shooterGame;
-                    if (g.keys['ArrowLeft'] || g.keys['KeyA']) g.ship.x -= g.ship.speed;
-                    if (g.keys['ArrowRight'] || g.keys['KeyD']) g.ship.x += g.ship.speed;
-                    if (g.ship.x < 20) g.ship.x = 20; if (g.ship.x > 780) g.ship.x = 780;
 
-                    g.lasers.forEach(l => l.y -= 8);
+                    if (g.keys['ArrowLeft'] || g.keys['KeyA'] || g.touchState.left) g.ship.x -= g.ship.speed;
+                    if (g.keys['ArrowRight'] || g.keys['KeyD'] || g.touchState.right) g.ship.x += g.ship.speed;
+                    if (g.ship.x < 25) g.ship.x = 25;
+                    if (g.ship.x > canvas.width - 25) g.ship.x = canvas.width - 25;
+
+                    g.lasers.forEach(l => l.y -= 10);
                     g.lasers = g.lasers.filter(l => l.y > 0);
 
                     enemyTimer++;
-                    if (enemyTimer > 45) {
+                    if (enemyTimer > 30) {
                         enemyTimer = 0;
-                        g.enemies.push({ x: Math.random() * 740 + 30, y: -20, speed: Math.random() * 2 + 2, size: 18 });
+                        g.enemies.push({
+                            x: Math.random() * (canvas.width - 60) + 30,
+                            y: -25,
+                            speed: Math.random() * 2 + 2,
+                            size: Math.random() * 8 + 14,
+                            type: Math.random() > 0.5 ? 'drone' : 'asteroid'
+                        });
                     }
+
                     g.enemies.forEach(e => e.y += e.speed);
 
                     g.lasers.forEach((l, li) => {
                         g.enemies.forEach((e, ei) => {
                             if (Math.hypot(l.x - e.x, l.y - e.y) < e.size + 8) {
                                 audioFX.explosion();
-                                g.score += 100;
+                                g.score += e.type === 'drone' ? 200 : 100;
                                 document.getElementById('shooter-score').innerText = g.score;
+                                
+                                for(let i=0; i<8; i++) {
+                                    g.particles.push({ x: e.x, y: e.y, vx: (Math.random()-0.5)*7, vy: (Math.random()-0.5)*7, life: 18 });
+                                }
+
                                 g.enemies.splice(ei, 1);
                                 g.lasers.splice(li, 1);
                             }
                         });
                     });
 
+                    g.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
+                    g.particles = g.particles.filter(p => p.life > 0);
+
                     g.enemies.forEach((e, ei) => {
-                        if (e.y > 450) {
+                        if (e.y > canvas.height) {
                             g.enemies.splice(ei, 1);
                             g.health -= 15;
-                            if (g.health <= 0) { alert(`Game Over! Score: ${g.score}`); this.exitSciFiShooter(); }
+                            document.getElementById('shooter-health').innerText = `${g.health}%`;
+                            if (g.health <= 0) {
+                                audioFX.error();
+                                alert(`Game Over! Dein Highscore: ${g.score}`);
+                                this.exitSciFiShooter();
+                            }
                         }
                     });
 
                     ctx.fillStyle = '#030712';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.fillStyle = '#06b6d4';
-                    ctx.beginPath(); ctx.moveTo(g.ship.x, g.ship.y - 15); ctx.lineTo(g.ship.x + 12, g.ship.y + 12); ctx.lineTo(g.ship.x - 12, g.ship.y + 12); ctx.fill();
 
                     ctx.fillStyle = '#38bdf8';
-                    g.lasers.forEach(l => ctx.fillRect(l.x - 2, l.y, 4, 10));
+                    for(let i=0; i<35; i++) {
+                        let sx = (i * 41 + Date.now() * 0.05) % canvas.width;
+                        let sy = (i * 59) % canvas.height;
+                        ctx.fillRect(sx, sy, 1.8, 1.8);
+                    }
 
-                    ctx.fillStyle = '#f43f5e';
-                    g.enemies.forEach(e => { ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill(); });
+                    ctx.save();
+                    ctx.translate(g.ship.x, g.ship.y);
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.shadowColor = '#06b6d4';
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -20);
+                    ctx.lineTo(16, 16);
+                    ctx.lineTo(0, 10);
+                    ctx.lineTo(-16, 16);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.beginPath();
+                    ctx.moveTo(-6, 16);
+                    ctx.lineTo(0, 26 + Math.random() * 6);
+                    ctx.lineTo(6, 16);
+                    ctx.fill();
+                    ctx.restore();
+
+                    ctx.fillStyle = '#22d3ee';
+                    ctx.shadowColor = '#22d3ee';
+                    ctx.shadowBlur = 10;
+                    g.lasers.forEach(l => ctx.fillRect(l.x - 2.5, l.y, 5, 14));
+
+                    g.enemies.forEach(e => {
+                        ctx.save();
+                        ctx.translate(e.x, e.y);
+                        if (e.type === 'drone') {
+                            ctx.fillStyle = '#f43f5e';
+                            ctx.shadowColor = '#f43f5e';
+                            ctx.shadowBlur = 12;
+                            ctx.beginPath(); ctx.arc(0, 0, e.size, 0, Math.PI * 2); ctx.fill();
+                        } else {
+                            ctx.fillStyle = '#64748b';
+                            ctx.shadowColor = '#64748b';
+                            ctx.shadowBlur = 6;
+                            ctx.beginPath();
+                            ctx.arc(0, 0, e.size, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        ctx.restore();
+                    });
+
+                    g.particles.forEach(p => {
+                        ctx.fillStyle = '#c084fc';
+                        ctx.fillRect(p.x, p.y, 3.5, 3.5);
+                    });
 
                     requestAnimationFrame(loop);
                 };
                 requestAnimationFrame(loop);
             }
 
-            fireLaser() {
+            fireShooterLaser() {
                 if (!this.shooterGame) return;
                 audioFX.laser();
-                this.shooterGame.lasers.push({ x: this.shooterGame.ship.x, y: this.shooterGame.ship.y - 15 });
+                this.shooterGame.lasers.push({ x: this.shooterGame.ship.x, y: this.shooterGame.ship.y - 20 });
             }
 
             exitSciFiShooter() {
