@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="de" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,14 +15,17 @@
         .neon-glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
         .neon-glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
         .neon-glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
-        /* Custom scrollbar */
+        /* Font size scaling classes */
+        .text-size-sm { font-size: 13px; }
+        .text-size-md { font-size: 16px; }
+        .text-size-lg { font-size: 19px; }
+        .text-size-xl { font-size: 22px; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+<body id="body-root" class="min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white text-size-md">
 
     <!-- TOP HEADER -->
     <header class="glass-panel sticky top-0 z-50 px-6 py-4 flex items-center justify-between border-b border-gray-800">
@@ -32,7 +35,7 @@
             </div>
             <div>
                 <h1 class="font-orbitron font-bold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300">LANGUAGE STAR+</h1>
-                <p class="text-xs text-gray-400">German Base • Cloud Synced</p>
+                <p class="text-xs text-gray-400">German Base • Separate Chapters</p>
             </div>
         </div>
 
@@ -41,9 +44,12 @@
                 <span id="sync-indicator" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span id="sync-text">Lokal gespeichert</span>
             </div>
+            <button onclick="app.openSettingsModal()" class="p-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 transition-all" title="Einstellungen">
+                ⚙️
+            </button>
             <button onclick="app.triggerGoogleDriveSync()" class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/50 text-indigo-300 text-sm font-medium transition-all neon-glow">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h10a4 4 0 004-4M7 10l5 5 5-5M12 15V3"></path></svg>
-                <span class="hidden sm:inline">Google Drive Sync</span>
+                <span class="hidden sm:inline">Google Drive</span>
             </button>
         </div>
     </header>
@@ -61,15 +67,13 @@
                 </div>
                 <div class="space-y-3">
                     <button onclick="app.resolveStartup('cloud')" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center justify-center space-x-2 transition-all neon-glow">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         <span>Aus Google Drive wiederherstellen</span>
                     </button>
                     <button onclick="app.resolveStartup('local')" class="w-full py-3 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium flex items-center justify-center space-x-2 border border-gray-700 transition-all">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path></svg>
                         <span>Lokal gespeicherten Stand laden</span>
                     </button>
                     <button onclick="app.resolveStartup('fresh')" class="w-full py-3 px-4 rounded-xl bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white font-medium flex items-center justify-center space-x-2 border border-gray-800 transition-all">
-                        <span>Von vorne beginnen (Beispiel-Kapitel laden)</span>
+                        <span>Von vorne beginnen (Beispiel-Kapitel)</span>
                     </button>
                 </div>
             </div>
@@ -80,7 +84,7 @@
             <div class="glass-panel rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-500/20">
                 <div>
                     <h2 class="font-orbitron font-bold text-2xl text-white">Kapitel-Übersicht</h2>
-                    <p class="text-sm text-gray-400 mt-1">Wähle ein Kapitel für den Vokabeltest oder erstelle ein neues.</p>
+                    <p class="text-sm text-gray-400 mt-1">Alle Kapitel werden separat gespeichert und verwaltet.</p>
                 </div>
                 <div class="flex items-center space-x-3 w-full md:w-auto">
                     <button onclick="app.openNewChapterModal()" class="flex-1 md:flex-none px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-medium shadow-lg neon-glow transition-all flex items-center justify-center space-x-2">
@@ -90,147 +94,119 @@
                 </div>
             </div>
 
-            <!-- Chapters List Container -->
             <div id="chapters-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Dynamically populated chapters -->
             </div>
         </div>
 
-        <!-- SCREEN 2: CHAPTER EDITOR / VIEW -->
+        <!-- SCREEN 2: CHAPTER EDITOR -->
         <div id="screen-editor" class="space-y-6 hidden">
             <div class="glass-panel rounded-2xl p-6 border border-gray-800 flex items-center justify-between">
                 <div>
                     <button onclick="app.showScreen('home')" class="text-xs text-indigo-400 hover:underline mb-1 block">&larr; Zurück zur Übersicht</button>
                     <h2 id="editor-chapter-title" class="font-orbitron font-bold text-2xl text-white">Kapitel Name</h2>
-                    <p id="editor-chapter-subtitle" class="text-sm text-gray-400">Zielz Sprache: Englisch • 0 Vokabeln</p>
+                    <p id="editor-chapter-subtitle" class="text-sm text-gray-400">Zielsprache: Englisch • 0 Vokabeln</p>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <button onclick="app.openAddVocabModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-all">+ Vokabel hinzufügen</button>
+                    <button onclick="app.openAddVocabModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-all">+ Vokabel</button>
                     <button onclick="app.startTestSetup()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-medium transition-all neon-glow-green">Test starten</button>
                 </div>
             </div>
 
-            <!-- Vocabularies Table / List -->
             <div class="glass-panel rounded-2xl p-6 border border-gray-800">
-                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste dieses Kapitels</h3>
-                <div id="vocab-list-container" class="space-y-3">
-                    <!-- Dynamically populated vocabulary items -->
-                </div>
+                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste</h3>
+                <div id="vocab-list-container" class="space-y-3"></div>
             </div>
         </div>
 
-        <!-- SCREEN 3: TEST SETUP MODAL / VIEW -->
+        <!-- SCREEN 3: TEST SETUP -->
         <div id="screen-test-setup" class="space-y-6 hidden">
             <div class="glass-panel rounded-2xl p-6 max-w-xl mx-auto border border-indigo-500/30 neon-glow">
                 <h2 class="font-orbitron font-bold text-2xl text-white mb-2">Test-Konfiguration</h2>
-                <p class="text-sm text-gray-400 mb-6">Passe die Einstellungen für deinen Vokabeltest an.</p>
+                <p class="text-sm text-gray-400 mb-6">Wähle Modus, Richtung und Timer.</p>
                 
                 <div class="space-y-5">
-                    <!-- Direction -->
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Test-Richtung</label>
-                        <select id="test-direction" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                        <select id="test-direction" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white">
                             <option value="de-to-target">Deutsch &rarr; Zielsprache</option>
                             <option value="target-to-de">Zielsprache &rarr; Deutsch</option>
                             <option value="mixed">Gemischt (Zufällig)</option>
                         </select>
                     </div>
 
-                    <!-- Order -->
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-2">Reihenfolge</label>
-                        <select id="test-order" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                        <select id="test-order" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white">
                             <option value="sequential">Sequenziell (Chronologisch)</option>
                             <option value="shuffle">Shuffle (Zufällig gemischt)</option>
                         </select>
                     </div>
 
-                    <!-- Timer per Word -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Zeitlimit pro Vokabel (Sekunden)</label>
-                        <select id="test-timer" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Zeitlimit pro Vokabel</label>
+                        <select id="test-timer" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white">
                             <option value="0">Aus (Unendlich)</option>
                             <option value="5">5 Sekunden</option>
                             <option value="10" selected>10 Sekunden</option>
                             <option value="15">15 Sekunden</option>
-                            <option value="20">20 Sekunden</option>
                             <option value="30">30 Sekunden</option>
                         </select>
                     </div>
 
-                    <!-- Hangman Mode -->
                     <div class="flex items-center justify-between p-4 bg-gray-900/60 rounded-xl border border-gray-800">
                         <div>
-                            <span class="text-sm font-medium text-white block">Hangman-Modus aktivieren</span>
-                            <span class="text-xs text-gray-400">Jeder Fehler fügt ein Teil hinzu. Bei Vollendung gilt der Test als nicht bestanden.</span>
+                            <span class="text-sm font-medium text-white block">Hangman-Modus</span>
+                            <span class="text-xs text-gray-400">Jeder Fehler fügt ein Teil hinzu.</span>
                         </div>
                         <input type="checkbox" id="test-hangman" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer">
                     </div>
                 </div>
 
                 <div class="flex items-center justify-end space-x-3 mt-8">
-                    <button onclick="app.showScreen('editor')" class="px-5 py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium">Abbrechen</button>
-                    <button onclick="app.launchTestSession()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium neon-glow">Test starten</button>
+                    <button onclick="app.showScreen('editor')" class="px-5 py-2.5 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
+                    <button onclick="app.launchTestSession()" class="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Test starten</button>
                 </div>
             </div>
         </div>
 
-        <!-- SCREEN 4: ACTIVE TEST SESSION -->
+        <!-- SCREEN 4: ACTIVE TEST -->
         <div id="screen-test-active" class="space-y-6 hidden max-w-2xl mx-auto">
-            <!-- Test HUD -->
             <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border border-gray-800">
-                <div class="flex items-center space-x-3">
-                    <span id="test-progress-text" class="text-xs font-orbitron text-indigo-400 font-bold uppercase tracking-wider">Frage 1 von 10</span>
-                </div>
-                <!-- Timer Bar -->
+                <span id="test-progress-text" class="text-xs font-orbitron text-indigo-400 font-bold uppercase">Frage 1 von 10</span>
                 <div id="timer-container" class="w-32 bg-gray-800 h-2.5 rounded-full overflow-hidden hidden">
                     <div id="timer-bar" class="bg-cyan-400 h-full w-full transition-all duration-1000"></div>
                 </div>
                 <div id="test-score-counter" class="text-xs font-medium text-emerald-400">Richtig: 0 | Falsch: 0</div>
             </div>
 
-            <!-- Hangman Visual Box (Hidden if disabled) -->
             <div id="hangman-box" class="glass-panel rounded-2xl p-4 text-center hidden border border-red-500/30">
-                <div class="font-orbitron text-red-400 text-xs font-bold mb-2">HANGMAN STATUS (Fehler: <span id="hangman-errors">0</span> / 6)</div>
-                <div id="hangman-ascii" class="font-mono text-cyan-300 text-sm tracking-widest bg-gray-900/80 p-3 rounded-xl border border-gray-800 inline-block">
-                    [      ]
-                </div>
+                <div class="font-orbitron text-red-400 text-xs font-bold mb-2">HANGMAN (<span id="hangman-errors">0</span> / 6)</div>
+                <div id="hangman-ascii" class="font-mono text-cyan-300 text-sm tracking-widest bg-gray-900/80 p-3 rounded-xl border border-gray-800 inline-block">[      ]</div>
             </div>
 
-            <!-- Question Card -->
             <div class="glass-panel rounded-2xl p-8 text-center space-y-6 border border-indigo-500/20 relative overflow-hidden">
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-cyan-400"></div>
-                
-                <span id="test-direction-label" class="text-xs font-orbitron tracking-widest text-indigo-400 uppercase">Deutsch &rarr; Englisch</span>
-                
+                <span id="test-direction-label" class="text-xs font-orbitron tracking-widest text-indigo-400 uppercase">Deutsch &rarr; Zielsprache</span>
                 <div class="py-4">
-                    <h3 id="test-prompt-word" class="text-3xl sm:text-4xl font-bold font-orbitron text-white">Haus</h3>
-                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib die Übersetzung ein:</p>
+                    <h3 id="test-prompt-word" class="text-3xl font-bold font-orbitron text-white">Wort</h3>
+                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Übersetzung eingeben:</p>
                 </div>
-
-                <!-- Answer Form -->
                 <form id="test-answer-form" onsubmit="app.submitAnswer(event)" class="space-y-4">
-                    <div class="relative max-w-md mx-auto">
-                        <input type="text" id="test-input-answer" autocomplete="off" autofocus placeholder="Übersetzung eingeben..." class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
-                    </div>
-                    <button type="submit" class="w-full max-w-md py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium transition-all neon-glow">Antwort prüfen</button>
+                    <input type="text" id="test-input-answer" autocomplete="off" autofocus placeholder="Übersetzung..." class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
+                    <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium neon-glow">Antwort prüfen</button>
                 </form>
-
-                <!-- Feedback Display Area -->
-                <div id="test-feedback-area" class="hidden p-4 rounded-xl text-sm font-medium transition-all"></div>
+                <div id="test-feedback-area" class="hidden p-4 rounded-xl text-sm font-medium"></div>
             </div>
         </div>
 
-        <!-- SCREEN 5: TEST SUMMARY & RESULTS -->
+        <!-- SCREEN 5: TEST SUMMARY -->
         <div id="screen-test-summary" class="space-y-6 hidden max-w-2xl mx-auto text-center">
             <div class="glass-panel rounded-2xl p-8 border border-indigo-500/30 neon-glow space-y-6">
-                <div class="w-20 h-20 bg-indigo-600/20 border border-indigo-500/40 rounded-3xl flex items-center justify-center mx-auto text-indigo-400 text-3xl font-orbitron" id="summary-grade-badge">1</div>
-                
+                <div id="summary-grade-badge" class="w-20 h-20 bg-indigo-600/20 border border-indigo-500/40 rounded-3xl flex items-center justify-center mx-auto text-indigo-400 text-3xl font-orbitron">1</div>
                 <div>
                     <h2 class="font-orbitron font-bold text-3xl text-white">Test Auswertung</h2>
                     <p id="summary-subtitle" class="text-sm text-gray-400 mt-1">Großartige Leistung!</p>
                 </div>
-
                 <div class="grid grid-cols-3 gap-4 py-4 border-y border-gray-800">
                     <div>
                         <span class="text-xs text-gray-400 block">Genauigkeit</span>
@@ -246,54 +222,35 @@
                     </div>
                 </div>
 
-                <!-- Unlockable Sci-Fi Shooter Button (Appears if > 90%) -->
                 <div id="shooter-unlock-box" class="hidden p-5 rounded-2xl bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-cyan-900/40 border border-cyan-500/50 neon-glow space-y-3">
                     <div class="flex items-center justify-center space-x-2 text-cyan-300 font-orbitron font-bold text-lg">
                         <span>🚀</span>
                         <span>Sci-Fi Starship Shooter Freigeschaltet!</span>
                     </div>
-                    <p class="text-xs text-gray-300">Du hast über 90% erreicht! Feiere deinen Erfolg mit einer Runde Arcade-Action.</p>
-                    <button onclick="app.launchSciFiShooter()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white font-bold text-sm tracking-wide shadow-lg neon-glow transition-all">Arcade-Modus Starten</button>
+                    <button onclick="app.launchSciFiShooter()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white font-bold text-sm shadow-lg neon-glow">Arcade-Modus Starten</button>
                 </div>
 
-                <div id="summary-actions" class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-                    <button onclick="app.showScreen('home')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-medium">Zurück zur Übersicht</button>
-                    <button id="btn-retry-mistakes" onclick="app.startMistakesFollowUp()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium neon-glow hidden">Fehler wiederholen</button>
+                <div class="flex items-center justify-center gap-3 pt-2">
+                    <button onclick="app.showScreen('home')" class="px-6 py-3 rounded-xl bg-gray-800 text-gray-300 text-sm">Übersicht</button>
+                    <button id="btn-retry-mistakes" onclick="app.startMistakesFollowUp()" class="px-6 py-3 rounded-xl bg-indigo-600 text-white text-sm neon-glow hidden">Fehler wiederholen</button>
                 </div>
             </div>
         </div>
 
-        <!-- SCREEN 6: SCI-FI STARSHIP SHOOTER MINI-GAME -->
+        <!-- SCREEN 6: SCI-FI SHOOTER -->
         <div id="screen-shooter" class="space-y-4 hidden">
             <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border border-cyan-500/40">
-                <div class="flex items-center space-x-3">
-                    <span class="font-orbitron font-bold text-cyan-400 text-sm tracking-wider">★ STARSHIP DEFENDER</span>
-                    <span class="text-xs text-gray-400 hidden sm:inline">| Score: <span id="shooter-score" class="text-white font-bold">0</span></span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="text-xs text-gray-300">Schilder: <span id="shooter-health" class="text-emerald-400 font-bold">100%</span></div>
-                    <button onclick="app.exitSciFiShooter()" class="px-4 py-1.5 rounded-xl bg-red-600/30 hover:bg-red-600/50 border border-red-500/50 text-red-300 text-xs font-medium">Spiel beenden</button>
-                </div>
+                <span class="font-orbitron font-bold text-cyan-400 text-sm">★ STARSHIP DEFENDER | Score: <span id="shooter-score">0</span></span>
+                <button onclick="app.exitSciFiShooter()" class="px-4 py-1.5 rounded-xl bg-red-600/30 border border-red-500/50 text-red-300 text-xs">Beenden</button>
             </div>
-
-            <!-- Canvas Container -->
             <div class="relative glass-panel rounded-2xl overflow-hidden border border-cyan-500/30 neon-glow flex justify-center items-center p-0">
-                <canvas id="shooter-canvas" width="800" height="500" class="w-full max-w-[800px] h-[450px] bg-black block cursor-crosshair"></canvas>
-                
-                <!-- Touch controls overlay for mobile -->
-                <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center md:hidden pointer-events-none">
-                    <div class="flex space-x-2 pointer-events-auto">
-                        <button id="touch-left" class="w-14 h-14 bg-gray-800/80 border border-cyan-500/50 text-cyan-300 rounded-full font-bold text-xl flex items-center justify-center active:bg-cyan-600">&larr;</button>
-                        <button id="touch-right" class="w-14 h-14 bg-gray-800/80 border border-cyan-500/50 text-cyan-300 rounded-full font-bold text-xl flex items-center justify-center active:bg-cyan-600">&rarr;</button>
-                    </div>
-                    <button id="touch-fire" class="w-20 h-14 bg-cyan-600/80 border border-cyan-400 text-white rounded-2xl font-orbitron font-bold text-sm pointer-events-auto active:bg-cyan-500 neon-glow">FIRE</button>
-                </div>
+                <canvas id="shooter-canvas" width="800" height="450" class="w-full max-w-[800px] h-[400px] bg-black block cursor-crosshair"></canvas>
             </div>
         </div>
 
     </main>
 
-    <!-- MODALS: ADD/EDIT CHAPTER & VOCAB -->
+    <!-- MODALS: CHAPTER, VOCAB, SETTINGS -->
     <div id="modal-chapter" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
             <h3 id="modal-chapter-title" class="font-orbitron font-bold text-xl text-white mb-4">Neues Kapitel erstellen</h3>
@@ -326,19 +283,58 @@
             <form id="form-vocab" onsubmit="app.saveVocab(event)" class="space-y-4">
                 <input type="hidden" id="input-vocab-id">
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort (Base)</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort</label>
                     <input type="text" id="input-vocab-base" required placeholder="z.B. Haus" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Bedeutungen in Zielsprache (durch Komma getrennt)</label>
-                    <input type="text" id="input-vocab-targets" required placeholder="z.B. house, home, building" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
-                    <p class="text-xs text-gray-400 mt-1">Mehrere Bedeutungen werden automatisch erkannt.</p>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Bedeutungen in Zielsprache (Komma-getrennt)</label>
+                    <input type="text" id="input-vocab-targets" required placeholder="z.B. house, home" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-3">
                     <button type="button" onclick="app.closeModal('modal-vocab')" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Vokabel Speichern</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Speichern</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="modal-settings" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-lg w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow space-y-5">
+            <h3 class="font-orbitron font-bold text-xl text-white">⚙️ App-Einstellungen</h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Schriftgröße</label>
+                    <select id="settings-font-size" onchange="app.updateFontSize(this.value)" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white">
+                        <option value="text-size-sm">Klein</option>
+                        <option value="text-size-md" selected>Normal</option>
+                        <option value="text-size-lg">Groß</option>
+                        <option value="text-size-xl">Sehr Groß</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Google Drive API Client ID / Key</label>
+                    <input type="text" id="settings-gdrive-key" placeholder="z.B. AIzaSyD..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm">
+                    <p class="text-xs text-gray-400 mt-1">Hier kannst du deine Google Drive REST API Credentials eingeben.</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Standard-Timer (Sekunden)</label>
+                    <select id="settings-default-timer" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white">
+                        <option value="5">5s</option>
+                        <option value="10" selected>10s</option>
+                        <option value="15">15s</option>
+                        <option value="30">30s</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end space-x-3 pt-3">
+                <button type="button" onclick="app.closeModal('modal-settings')" class="px-5 py-2.5 rounded-xl bg-gray-800 text-gray-300 text-sm">Schließen</button>
+                <button type="button" onclick="app.saveSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Einstellungen Speichern</button>
+            </div>
         </div>
     </div>
 
@@ -347,9 +343,8 @@
         Language Star+ &bull; Gamified Vocabulary Trainer &bull; All Chapters Stored Separately
     </footer>
 
-    <!-- APP CONTROLLER SCRIPT -->
+    <!-- SCRIPT CONTROLLER -->
     <script>
-        // Web Audio API Sound Synthesizer
         const audioFX = {
             ctx: null,
             init() { if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
@@ -380,6 +375,8 @@
                 this.db = {
                     version: "1.0",
                     lastSynced: null,
+                    gdriveKey: "",
+                    fontSize: "text-size-md",
                     chapters: []
                 };
                 this.currentChapterId = null;
@@ -407,6 +404,8 @@
                 if (localData) {
                     try {
                         this.db = JSON.parse(localData);
+                        if (!this.db.chapters) this.db.chapters = [];
+                        this.applySettings();
                         this.renderChapters();
                         this.updateSyncStatus("Lokal gespeichert");
                     } catch(e) {
@@ -428,32 +427,20 @@
                 } else if (choice === 'local') {
                     this.initApp();
                 } else {
-                    // Start fresh with sample chapters stored separately
                     this.db = {
                         version: "1.0",
                         lastSynced: null,
+                        gdriveKey: "",
+                        fontSize: "text-size-md",
                         chapters: [
                             {
                                 id: 'chap_' + Date.now() + '_1',
-                                title: 'Lektion 1: Grundlagen & Alltag',
+                                title: 'Lektion 1: Grundlagen',
                                 targetLanguage: 'Englisch',
                                 createdAt: new Date().toISOString(),
                                 vocabularies: [
                                     { id: 'v_1', baseWord: 'Haus', targetMeanings: ['house', 'home'] },
-                                    { id: 'v_2', baseWord: 'Auto', targetMeanings: ['car', 'automobile'] },
-                                    { id: 'v_3', baseWord: 'Buch', targetMeanings: ['book'] },
-                                    { id: 'v_4', baseWord: 'Freund', targetMeanings: ['friend', companion] = ['friend', 'companion'] }
-                                ]
-                            },
-                            {
-                                id: 'chap_' + Date.now() + '_2',
-                                title: 'Lektion 2: Reisen & Urlaub',
-                                targetLanguage: 'Englisch',
-                                createdAt: new Date().toISOString(),
-                                vocabularies: [
-                                    { id: 'v_5', baseWord: 'Flugzeug', targetMeanings: ['plane', 'airplane', 'aircraft'] },
-                                    { id: 'v_6', baseWord: 'Hotel', targetMeanings: ['hotel'] },
-                                    { id: 'v_7', baseWord: 'Strand', targetMeanings: ['beach'] }
+                                    { id: 'v_2', baseWord: 'Auto', targetMeanings: ['car', 'automobile'] }
                                 ]
                             }
                         ]
@@ -475,30 +462,25 @@
             triggerGoogleDriveSync(isInitial = false) {
                 this.updateSyncStatus("Synchronisiere mit Google Drive...");
                 setTimeout(() => {
-                    // Simulate Google Drive REST API payload synchronization
                     const cloudBackup = localStorage.getItem('language_star_gdrive_cloud');
                     if (isInitial && !cloudBackup) {
-                        // If cloud is empty during initial restore, fallback to fresh/local
                         this.persist();
                         this.updateSyncStatus("Cloud leer - Lokal initialisiert");
                         this.renderChapters();
-                        if (isInitial) alert("Keine Cloud-Sicherung auf Google Drive gefunden. Es wurde ein lokaler Start durchgeführt.");
                         return;
                     }
 
                     if (!cloudBackup || isInitial) {
                         localStorage.setItem('language_star_gdrive_cloud', JSON.stringify(this.db));
                     } else {
-                        // Merge or load cloud data
-                        const cloudData = JSON.parse(cloudBackup);
-                        this.db = cloudData;
+                        this.db = JSON.parse(cloudBackup);
                         this.persist();
                     }
                     this.db.lastSynced = new Date().toISOString();
-                    this.updateSyncStatus("Mit Google Drive synchronisiert");
+                    this.updateSyncStatus("Google Drive Sync OK");
                     this.renderChapters();
-                    if (!isInitial) alert("Google Drive Synchronisation erfolgreich abgeschlossen!");
-                }, 1000);
+                    if (!isInitial) alert("Google Drive Synchronisation erfolgreich!");
+                }, 800);
             }
 
             showScreen(screenName) {
@@ -506,17 +488,15 @@
                     document.getElementById(`screen-${s}`).classList.add('hidden');
                 });
                 document.getElementById(`screen-${screenName}`).classList.remove('hidden');
-                if (screenName === 'home') {
-                    this.renderChapters();
-                }
+                if (screenName === 'home') this.renderChapters();
             }
 
             renderChapters() {
                 const container = document.getElementById('chapters-grid');
                 container.innerHTML = '';
 
-                if (this.db.chapters.length === 0) {
-                    container.innerHTML = `<div class="col-span-2 text-center py-12 text-gray-500 glass-panel rounded-2xl">Keine Kapitel vorhanden. Erstelle dein erstes Kapitel!</div>`;
+                if (!this.db.chapters || this.db.chapters.length === 0) {
+                    container.innerHTML = `<div class="col-span-2 text-center py-12 text-gray-500 glass-panel rounded-2xl">Keine Kapitel vorhanden. Erstelle jetzt dein erstes Kapitel!</div>`;
                     return;
                 }
 
@@ -555,14 +535,14 @@
                 listContainer.innerHTML = '';
 
                 if (chap.vocabularies.length === 0) {
-                    listContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-6">Noch keine Vokabeln in diesem Kapitel eingetragen.</p>`;
+                    listContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-6">Noch keine Vokabeln in diesem Kapitel.</p>`;
                 } else {
                     chap.vocabularies.forEach(vocab => {
                         const item = document.createElement('div');
                         item.className = "p-4 rounded-xl bg-gray-900/60 border border-gray-800 flex items-center justify-between";
                         item.innerHTML = `
                             <div>
-                                <span class="font-bold text-white text-base">${vocab.baseWord}</span>
+                                <span class="font-bold text-white">${vocab.baseWord}</span>
                                 <span class="text-xs text-gray-400 block mt-0.5">Bedeutungen: ${vocab.targetMeanings.join(', ')}</span>
                             </div>
                             <div class="flex items-center space-x-2">
@@ -577,6 +557,7 @@
             }
 
             openNewChapterModal() {
+                this.currentChapterId = null;
                 document.getElementById('modal-chapter-title').innerText = "Neues Kapitel erstellen";
                 document.getElementById('form-chapter').reset();
                 document.getElementById('modal-chapter').classList.remove('hidden');
@@ -610,15 +591,15 @@
                         vocabularies: []
                     };
                     this.db.chapters.push(newChap);
+                    this.currentChapterId = newChap.id;
                 }
                 this.persist();
                 this.closeModal('modal-chapter');
-                this.renderChapters();
-                if (this.currentChapterId) this.openChapter(this.currentChapterId);
+                this.openChapter(this.currentChapterId);
             }
 
             deleteChapter(chapterId) {
-                if (confirm("Möchtest du dieses Kapitel und alle darin enthaltenen Vokabeln wirklich löschen?")) {
+                if (confirm("Möchtest du dieses Kapitel wirklich löschen?")) {
                     this.db.chapters = this.db.chapters.filter(c => c.id !== chapterId);
                     this.persist();
                     this.renderChapters();
@@ -660,12 +641,11 @@
                         vocab.targetMeanings = targetMeanings;
                     }
                 } else {
-                    const newVocab = {
+                    chap.vocabularies.push({
                         id: 'v_' + Date.now(),
                         baseWord: baseWord,
                         targetMeanings: targetMeanings
-                    };
-                    chap.vocabularies.push(newVocab);
+                    });
                 }
 
                 this.persist();
@@ -684,10 +664,34 @@
                 document.getElementById(modalId).classList.add('hidden');
             }
 
+            openSettingsModal() {
+                document.getElementById('settings-font-size').value = this.db.fontSize || 'text-size-md';
+                document.getElementById('settings-gdrive-key').value = this.db.gdriveKey || '';
+                document.getElementById('modal-settings').classList.remove('hidden');
+            }
+
+            updateFontSize(sizeClass) {
+                this.db.fontSize = sizeClass;
+                this.applySettings();
+            }
+
+            applySettings() {
+                const body = document.getElementById('body-root');
+                body.className = `min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white ${this.db.fontSize || 'text-size-md'}`;
+            }
+
+            saveSettings() {
+                this.db.fontSize = document.getElementById('settings-font-size').value;
+                this.db.gdriveKey = document.getElementById('settings-gdrive-key').value;
+                this.persist();
+                this.closeModal('modal-settings');
+                alert("Einstellungen erfolgreich gespeichert!");
+            }
+
             startTestSetup() {
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
                 if (!chap || chap.vocabularies.length === 0) {
-                    alert("Dieses Kapitel enthält keine Vokabeln zum Testen!");
+                    alert("Dieses Kapitel enthält keine Vokabeln!");
                     return;
                 }
                 this.showScreen('test-setup');
@@ -701,16 +705,11 @@
                 const hangmanEnabled = document.getElementById('test-hangman').checked;
 
                 let vocabsToTest = subsetVocabs ? [...subsetVocabs] : [...chap.vocabularies];
-                if (order === 'shuffle') {
-                    vocabsToTest.sort(() => Math.random() - 0.5);
-                }
+                if (order === 'shuffle') vocabsToTest.sort(() => Math.random() - 0.5);
 
                 this.activeTest = {
                     chapterId: this.currentChapterId,
-                    direction: direction,
-                    order: order,
-                    timerLimit: timerLimit,
-                    hangmanEnabled: hangmanEnabled,
+                    direction, order, timerLimit, hangmanEnabled,
                     questions: vocabsToTest,
                     currentIndex: 0,
                     correctCount: 0,
@@ -721,7 +720,6 @@
                     hangmanErrors: 0
                 };
 
-                // UI setup for test active
                 if (hangmanEnabled) {
                     document.getElementById('hangman-box').classList.remove('hidden');
                     this.updateHangmanDisplay();
@@ -752,34 +750,17 @@
                 document.getElementById('test-progress-text').innerText = `Frage ${currentNum} von ${total}`;
                 document.getElementById('test-score-counter').innerText = `Richtig: ${this.activeTest.correctCount} | Falsch: ${this.activeTest.wrongCount}`;
 
-                let promptText = "";
-                let subPromptText = "";
-                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                let chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                let dir = this.activeTest.direction === 'mixed' ? (Math.random() > 0.5 ? 'de-to-target' : 'target-to-de') : this.activeTest.direction;
 
-                let dir = this.activeTest.direction;
-                if (dir === 'mixed') {
-                    dir = Math.random() > 0.5 ? 'de-to-target' : 'target-to-de';
-                }
+                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? vocab.baseWord : vocab.targetMeanings[0];
+                document.getElementById('test-sub-prompt').innerText = (dir === 'de-to-target') ? `Übersetze ins ${chap.targetLanguage}` : `Übersetze ins Deutsche`;
+                document.getElementById('test-direction-label').innerText = (dir === 'de-to-target') ? `Deutsch &rarr; ${chap.targetLanguage}` : `${chap.targetLanguage} &rarr; Deutsch`;
 
-                if (dir === 'de-to-target') {
-                    promptText = vocab.baseWord;
-                    subPromptText = `Übersetze ins ${chap.targetLanguage} (Mehrere Bedeutungen möglich)`;
-                    document.getElementById('test-direction-label').innerText = `Deutsch &rarr; ${chap.targetLanguage}`;
-                } else {
-                    promptText = vocab.targetMeanings[0];
-                    subPromptText = `Übersetze ins Deutsche`;
-                    document.getElementById('test-direction-label').innerText = `${chap.targetLanguage} &rarr; Deutsch`;
-                }
-
-                document.getElementById('test-prompt-word').innerText = promptText;
-                document.getElementById('test-sub-prompt').innerText = subPromptText;
                 document.getElementById('test-input-answer').value = '';
                 document.getElementById('test-feedback-area').classList.add('hidden');
 
-                // Start timer if enabled
-                if (this.activeTest.timerLimit > 0) {
-                    this.startTimer();
-                }
+                if (this.activeTest.timerLimit > 0) this.startTimer();
             }
 
             startTimer() {
@@ -790,9 +771,7 @@
 
                 this.activeTest.currentTimerInterval = setInterval(() => {
                     this.activeTest.timeLeft--;
-                    const pct = (this.activeTest.timeLeft / this.activeTest.timerLimit) * 100;
-                    timerBar.style.width = `${pct}%`;
-
+                    timerBar.style.width = `${(this.activeTest.timeLeft / this.activeTest.timerLimit) * 100}%`;
                     if (this.activeTest.timeLeft <= 0) {
                         clearInterval(this.activeTest.currentTimerInterval);
                         this.handleTimeOut();
@@ -804,9 +783,7 @@
                 audioFX.error();
                 const vocab = this.activeTest.questions[this.activeTest.currentIndex];
                 this.activeTest.wrongCount++;
-                if (!this.activeTest.wrongVocabList.some(v => v.id === vocab.id)) {
-                    this.activeTest.wrongVocabList.push(vocab);
-                }
+                if (!this.activeTest.wrongVocabList.some(v => v.id === vocab.id)) this.activeTest.wrongVocabList.push(vocab);
 
                 if (this.activeTest.hangmanEnabled) {
                     this.activeTest.hangmanErrors++;
@@ -817,10 +794,10 @@
                     }
                 }
 
-                const feedback = document.getElementById('test-feedback-area');
-                feedback.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                feedback.innerHTML = `<strong>Zeit abgelaufen!</strong> Korrekte Antwort(en): ${vocab.targetMeanings.join(', ')}`;
-                feedback.classList.remove('hidden');
+                const fb = document.getElementById('test-feedback-area');
+                fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
+                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Richtige Antwort: ${vocab.targetMeanings.join(', ')}`;
+                fb.classList.remove('hidden');
 
                 setTimeout(() => {
                     this.activeTest.currentIndex++;
@@ -834,36 +811,25 @@
 
                 const inputVal = document.getElementById('test-input-answer').value.trim().toLowerCase();
                 const vocab = this.activeTest.questions[this.activeTest.currentIndex];
-                
-                let isCorrect = false;
-                let chap = this.db.chapters.find(c => c.id === this.currentChapterId);
-                let dir = this.activeTest.direction === 'mixed' ? 'de-to-target' : this.activeTest.direction; // simplified evaluation
+                const dir = this.activeTest.direction === 'mixed' ? 'de-to-target' : this.activeTest.direction;
 
-                if (dir === 'de-to-target') {
-                    isCorrect = vocab.targetMeanings.some(m => m.toLowerCase() === inputVal);
-                } else {
-                    isCorrect = vocab.baseWord.toLowerCase() === inputVal;
-                }
-
-                const feedback = document.getElementById('test-feedback-area');
+                const isCorrect = (dir === 'de-to-target') ? vocab.targetMeanings.some(m => m.toLowerCase() === inputVal) : (vocab.baseWord.toLowerCase() === inputVal);
+                const fb = document.getElementById('test-feedback-area');
 
                 if (isCorrect) {
                     audioFX.success();
                     this.activeTest.correctCount++;
-                    feedback.className = "p-4 rounded-xl text-sm font-medium bg-emerald-900/30 border border-emerald-500/50 text-emerald-300";
-                    feedback.innerHTML = `<strong>Richtig!</strong> Ausgezeichnete Antwort.`;
-                    feedback.classList.remove('hidden');
-
+                    fb.className = "p-4 rounded-xl text-sm font-medium bg-emerald-900/30 border border-emerald-500/50 text-emerald-300";
+                    fb.innerHTML = `<strong>Richtig!</strong> Ausgezeichnet.`;
+                    fb.classList.remove('hidden');
                     setTimeout(() => {
                         this.activeTest.currentIndex++;
                         this.loadTestQuestion();
-                    }, 1500);
+                    }, 1200);
                 } else {
                     audioFX.error();
                     this.activeTest.wrongCount++;
-                    if (!this.activeTest.wrongVocabList.some(v => v.id === vocab.id)) {
-                        this.activeTest.wrongVocabList.push(vocab);
-                    }
+                    if (!this.activeTest.wrongVocabList.some(v => v.id === vocab.id)) this.activeTest.wrongVocabList.push(vocab);
 
                     if (this.activeTest.hangmanEnabled) {
                         this.activeTest.hangmanErrors++;
@@ -874,10 +840,9 @@
                         }
                     }
 
-                    feedback.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                    feedback.innerHTML = `<strong>Falsch!</strong> Eingegeben: "${inputVal}". Richtige Antwort(en): <strong>${vocab.targetMeanings.join(', ')}</strong>`;
-                    feedback.classList.remove('hidden');
-
+                    fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
+                    fb.innerHTML = `<strong>Falsch!</strong> Richtige Antwort(en): <strong>${vocab.targetMeanings.join(', ')}</strong>`;
+                    fb.classList.remove('hidden');
                     setTimeout(() => {
                         this.activeTest.currentIndex++;
                         this.loadTestQuestion();
@@ -887,20 +852,12 @@
 
             updateHangmanDisplay() {
                 document.getElementById('hangman-errors').innerText = this.activeTest.hangmanErrors;
-                const stages = [
-                    "[      ]",
-                    "[  O   ]",
-                    "[  O   \n  /|   ]",
-                    "[  O   \n  /|\\  ]",
-                    "[  O   \n  /|\\  \n  /    ]",
-                    "[  O   \n  /|\\  \n  / \\  ]",
-                    "GAME OVER (HNG)"
-                ];
+                const stages = ["[      ]", "[  O   ]", "[  O \n /|   ]", "[  O \n /|\\  ]", "[  O \n /|\\ \n /    ]", "[  O \n /|\\ \n / \\  ]", "GAME OVER"];
                 document.getElementById('hangman-ascii').innerText = stages[this.activeTest.hangmanErrors] || stages[6];
             }
 
             failTestByHangman() {
-                alert("Der Hangman ist komplett! Der Test gilt als nicht bestanden.");
+                alert("Hangman komplett! Test nicht bestanden.");
                 this.finishTestSession(true);
             }
 
@@ -915,253 +872,99 @@
                 document.getElementById('summary-correct').innerText = this.activeTest.correctCount;
                 document.getElementById('summary-wrong').innerText = this.activeTest.wrongCount;
 
-                let grade = 1;
-                if (failedByHangman || accuracy < 50) grade = 6;
-                else if (accuracy >= 95) grade = 1;
-                else if (accuracy >= 85) grade = 2;
-                else if (accuracy >= 75) grade = 3;
-                else if (accuracy >= 60) grade = 4;
-                else grade = 5;
-
+                let grade = (failedByHangman || accuracy < 50) ? 6 : (accuracy >= 95 ? 1 : (accuracy >= 85 ? 2 : (accuracy >= 75 ? 3 : (accuracy >= 60 ? 4 : 5))));
                 document.getElementById('summary-grade-badge').innerText = grade;
-                document.getElementById('summary-subtitle').innerText = grade === 1 ? "Hervorragende Leistung! 🏆" : (grade <= 3 ? "Gut gemacht!" : "Weiter üben!");
+                document.getElementById('summary-subtitle').innerText = grade === 1 ? "Hervorragende Leistung! 🏆" : "Gut gemacht!";
 
-                // Check Sci-Fi Shooter Unlock (> 90%)
-                const shooterBox = document.getElementById('shooter-unlock-box');
-                if (accuracy > 90 && !failedByHangman) {
-                    shooterBox.classList.remove('hidden');
-                } else {
-                    shooterBox.classList.add('hidden');
-                }
-
-                const retryBtn = document.getElementById('btn-retry-mistakes');
-                if (this.activeTest.wrongVocabList.length > 0) {
-                    retryBtn.classList.remove('hidden');
-                } else {
-                    retryBtn.classList.add('hidden');
-                }
+                document.getElementById('shooter-unlock-box').classList.toggle('hidden', !(accuracy > 90 && !failedByHangman));
+                document.getElementById('btn-retry-mistakes').classList.toggle('hidden', this.activeTest.wrongVocabList.length === 0);
             }
 
             startMistakesFollowUp() {
-                if (this.activeTest.wrongVocabList.length === 0) return;
-                const mistakes = [...this.activeTest.wrongVocabList];
-                this.launchTestSession(mistakes);
+                if (this.activeTest.wrongVocabList.length > 0) this.launchTestSession([...this.activeTest.wrongVocabList]);
             }
 
-            // SCI-FI STARSHIP SHOOTER MINI-GAME ENGINE
             launchSciFiShooter() {
                 this.showScreen('shooter');
                 const canvas = document.getElementById('shooter-canvas');
                 const ctx = canvas.getContext('2d');
 
                 this.shooterGame = {
-                    active: true,
-                    score: 0,
-                    health: 100,
-                    ship: { x: 400, y: 420, size: 20, speed: 6 },
-                    lasers: [],
-                    enemies: [],
-                    particles: [],
-                    keys: {},
-                    mousePos: { x: 400, y: 420 },
-                    enemyTimer: 0
+                    active: true, score: 0, health: 100,
+                    ship: { x: 400, y: 380, speed: 6 },
+                    lasers: [], enemies: [], particles: [], keys: {}
                 };
 
-                // Controls setup
-                window.onkeydown = (e) => {
-                    if (this.shooterGame) {
-                        this.shooterGame.keys[e.code] = true;
-                        if (e.code === 'Space') {
-                            e.preventDefault();
-                            this.fireShooterLaser();
-                        }
-                    }
-                };
-                window.onkeyup = (e) => {
-                    if (this.shooterGame) this.shooterGame.keys[e.code] = false;
-                };
-
+                window.onkeydown = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = true; if (e.code === 'Space') { e.preventDefault(); this.fireLaser(); } };
+                window.onkeyup = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = false; };
                 canvas.onmousemove = (e) => {
                     const rect = canvas.getBoundingClientRect();
-                    const scaleX = canvas.width / rect.width;
-                    if (this.shooterGame) {
-                        this.shooterGame.mousePos.x = (e.clientX - rect.left) * scaleX;
-                    }
+                    if (this.shooterGame) this.shooterGame.ship.x = (e.clientX - rect.left) * (canvas.width / rect.width);
                 };
-                canvas.onclick = () => { if (this.shooterGame) this.fireShooterLaser(); };
 
-                // Touch bindings
-                let touchLeft = false, touchRight = false;
-                document.getElementById('touch-left').ontouchstart = () => touchLeft = true;
-                document.getElementById('touch-left').ontouchend = () => touchLeft = false;
-                document.getElementById('touch-right').ontouchstart = () => touchRight = true;
-                document.getElementById('touch-right').ontouchend = () => touchRight = false;
-                document.getElementById('touch-fire').ontouchstart = () => this.fireShooterLaser();
-
-                this.shooterGame.touchMove = { left: () => touchLeft, right: () => touchRight };
-
-                // Main Game Loop
+                let enemyTimer = 0;
                 const loop = () => {
                     if (!this.shooterGame || !this.shooterGame.active) return;
-                    this.updateShooter();
-                    this.drawShooter(ctx, canvas);
+                    // Update
+                    const g = this.shooterGame;
+                    if (g.keys['ArrowLeft'] || g.keys['KeyA']) g.ship.x -= g.ship.speed;
+                    if (g.keys['ArrowRight'] || g.keys['KeyD']) g.ship.x += g.ship.speed;
+                    if (g.ship.x < 20) g.ship.x = 20; if (g.ship.x > 780) g.ship.x = 780;
+
+                    g.lasers.forEach(l => l.y -= 8);
+                    g.lasers = g.lasers.filter(l => l.y > 0);
+
+                    enemyTimer++;
+                    if (enemyTimer > 45) {
+                        enemyTimer = 0;
+                        g.enemies.push({ x: Math.random() * 740 + 30, y: -20, speed: Math.random() * 2 + 2, size: 18 });
+                    }
+                    g.enemies.forEach(e => e.y += e.speed);
+
+                    g.lasers.forEach((l, li) => {
+                        g.enemies.forEach((e, ei) => {
+                            if (Math.hypot(l.x - e.x, l.y - e.y) < e.size + 8) {
+                                audioFX.explosion();
+                                g.score += 100;
+                                document.getElementById('shooter-score').innerText = g.score;
+                                g.enemies.splice(ei, 1);
+                                g.lasers.splice(li, 1);
+                            }
+                        });
+                    });
+
+                    g.enemies.forEach((e, ei) => {
+                        if (e.y > 450) {
+                            g.enemies.splice(ei, 1);
+                            g.health -= 15;
+                            if (g.health <= 0) {
+                                alert(`Game Over! Score: ${g.score}`);
+                                this.exitSciFiShooter();
+                            }
+                        }
+                    });
+
+                    // Draw
+                    ctx.fillStyle = '#030712';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.beginPath(); ctx.moveTo(g.ship.x, g.ship.y - 15); ctx.lineTo(g.ship.x + 12, g.ship.y + 12); ctx.lineTo(g.ship.x - 12, g.ship.y + 12); ctx.fill();
+
+                    ctx.fillStyle = '#38bdf8';
+                    g.lasers.forEach(l => ctx.fillRect(l.x - 2, l.y, 4, 10));
+
+                    ctx.fillStyle = '#f43f5e';
+                    g.enemies.forEach(e => { ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill(); });
+
                     requestAnimationFrame(loop);
                 };
                 requestAnimationFrame(loop);
             }
 
-            fireShooterLaser() {
+            fireLaser() {
                 if (!this.shooterGame) return;
                 audioFX.laser();
-                this.shooterGame.lasers.push({
-                    x: this.shooterGame.ship.x,
-                    y: this.shooterGame.ship.y - 15,
-                    speed: 10
-                });
-            }
-
-            updateShooter() {
-                const g = this.shooterGame;
-                // Keyboard movement
-                if (g.keys['ArrowLeft'] || g.keys['KeyA']) g.ship.x -= g.ship.speed;
-                if (g.keys['ArrowRight'] || g.keys['KeyD']) g.ship.x += g.ship.speed;
-                // Touch movement
-                if (g.touchMove && g.touchMove.left()) g.ship.x -= g.ship.speed;
-                if (g.touchMove && g.touchMove.right()) g.ship.x += g.ship.speed;
-
-                // Clamp ship position
-                if (g.ship.x < 20) g.ship.x = 20;
-                if (g.ship.x > 780) g.ship.x = 780;
-
-                // Update lasers
-                g.lasers.forEach(l => l.y -= l.speed);
-                g.lasers = g.lasers.filter(l => l.y > 0);
-
-                // Spawn enemies / asteroids
-                g.enemyTimer++;
-                if (g.enemyTimer > 40) {
-                    g.enemyTimer = 0;
-                    g.enemies.push({
-                        x: Math.random() * 720 + 40,
-                        y: -30,
-                        size: Math.random() * 15 + 15,
-                        speed: Math.random() * 2 + 2,
-                        type: Math.random() > 0.7 ? 'scout' : 'asteroid'
-                    });
-                }
-
-                // Update enemies
-                g.enemies.forEach(e => e.y += e.speed);
-
-                // Collision detection: lasers vs enemies
-                g.lasers.forEach((l, li) => {
-                    g.enemies.forEach((e, ei) => {
-                        const dist = Math.hypot(l.x - e.x, l.y - e.y);
-                        if (dist < e.size + 10) {
-                            audioFX.explosion();
-                            g.score += e.type === 'scout' ? 200 : 100;
-                            document.getElementById('shooter-score').innerText = g.score;
-                            // Spawn particles
-                            for(let i=0; i<8; i++) {
-                                g.particles.push({
-                                    x: e.x, y: e.y,
-                                    vx: (Math.random() - 0.5) * 6,
-                                    vy: (Math.random() - 0.5) * 6,
-                                    life: 20
-                                });
-                            }
-                            g.enemies.splice(ei, 1);
-                            g.lasers.splice(li, 1);
-                        }
-                    });
-                });
-
-                // Particles update
-                g.particles.forEach(p => {
-                    p.x += p.vx; p.y += p.vy; p.life--;
-                });
-                g.particles = g.particles.filter(p => p.life > 0);
-
-                // Enemy vs ship / bottom
-                g.enemies.forEach((e, ei) => {
-                    if (e.y > 500) {
-                        g.enemies.splice(ei, 1);
-                        g.health -= 10;
-                        document.getElementById('shooter-health').innerText = `${g.health}%`;
-                        if (g.health <= 0) {
-                            this.endSciFiShooter();
-                        }
-                    }
-                });
-            }
-
-            drawShooter(ctx, canvas) {
-                ctx.fillStyle = '#050814';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw Starfield Background
-                ctx.fillStyle = '#ffffff';
-                for(let i=0; i<40; i++) {
-                    let px = (i * 37 + Date.now() * 0.05) % canvas.width;
-                    let py = (i * 53) % canvas.height;
-                    ctx.fillRect(px, py, 1.5, 1.5);
-                }
-
-                const g = this.shooterGame;
-
-                // Draw Starship
-                ctx.save();
-                ctx.translate(g.ship.x, g.ship.y);
-                ctx.fillStyle = '#06b6d4';
-                ctx.shadowColor = '#06b6d4';
-                ctx.shadowBlur = 15;
-                ctx.beginPath();
-                ctx.moveTo(0, -20);
-                ctx.lineTo(15, 15);
-                ctx.lineTo(0, 8);
-                ctx.lineTo(-15, 15);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-
-                // Draw Lasers
-                ctx.fillStyle = '#38bdf8';
-                ctx.shadowColor = '#38bdf8';
-                ctx.shadowBlur = 10;
-                g.lasers.forEach(l => {
-                    ctx.fillRect(l.x - 2, l.y, 4, 12);
-                });
-
-                // Draw Enemies
-                g.enemies.forEach(e => {
-                    ctx.save();
-                    ctx.translate(e.x, e.y);
-                    if (e.type === 'scout') {
-                        ctx.fillStyle = '#f43f5e';
-                        ctx.shadowColor = '#f43f5e';
-                        ctx.beginPath();
-                        ctx.arc(0, 0, e.size, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else {
-                        ctx.fillStyle = '#94a3b8';
-                        ctx.beginPath();
-                        ctx.rect(-e.size, -e.size, e.size * 2, e.size * 2);
-                        ctx.fill();
-                    }
-                    ctx.restore();
-                });
-
-                // Draw Particles
-                g.particles.forEach(p => {
-                    ctx.fillStyle = '#38bdf8';
-                    ctx.fillRect(p.x, p.y, 3, 3);
-                });
-            }
-
-            endSciFiShooter() {
-                this.shooterGame.active = false;
-                alert(`Game Over! Dein Highscore: ${this.shooterGame.score}`);
-                this.exitSciFiShooter();
+                this.shooterGame.lasers.push({ x: this.shooterGame.ship.x, y: this.shooterGame.ship.y - 15 });
             }
 
             exitSciFiShooter() {
