@@ -58,8 +58,8 @@
             <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/40 neon-glow">
                 <div class="text-center mb-6">
                     <div class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-cyan-400 rounded-2xl flex items-center justify-center mx-auto mb-3 text-white text-2xl font-orbitron neon-glow">★</div>
-                    <h2 class="font-orbitron font-bold text-xl text-white">Willkommen bei Language Star+</h2>
-                    <p class="text-sm text-gray-400 mt-1">Wie möchtest du starten?</p>
+                    <h2 class="font-orbitron font-bold text-xl text-white">Datenbank-Initialisierung</h2>
+                    <p class="text-sm text-gray-400 mt-1">Keine lokale oder Cloud-Datenbank gefunden. Wie möchtest du starten?</p>
                 </div>
                 <div class="space-y-3">
                     <button onclick="app.resolveStartup('cloud')" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-all neon-glow">Aus Google Drive wiederherstellen</button>
@@ -181,7 +181,7 @@
                 <span id="test-direction-label" class="text-xs font-orbitron tracking-widest text-indigo-400 uppercase">Deutsch &rarr; Zielsprache</span>
                 <div class="py-4">
                     <h3 id="test-prompt-word" class="text-3xl font-bold font-orbitron text-white">Wort</h3>
-                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib eine Bedeutung ein (Groß-/Kleinschreibung wird berücksichtigt):</p>
+                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib eine Bedeutung ein:</p>
                 </div>
                 <form id="test-answer-form" onsubmit="app.submitAnswer(event)" class="space-y-4">
                     <input type="text" id="test-input-answer" autocomplete="off" autofocus placeholder="Übersetzung..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
@@ -243,7 +243,6 @@
             <div class="relative glass-panel rounded-2xl overflow-hidden border border-cyan-500/50 neon-glow-cyan flex flex-col items-center p-0">
                 <canvas id="shooter-canvas" width="700" height="420" class="w-full max-w-[700px] h-[380px] bg-black block cursor-crosshair touch-none"></canvas>
                 
-                <!-- Polished Sci-Fi HUD Control Deck -->
                 <div class="w-full bg-slate-950/95 p-4 border-t border-cyan-500/40 flex justify-between items-center">
                     <div class="flex space-x-3">
                         <button id="touch-left" class="w-16 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-2xl active:bg-cyan-600 active:text-white shadow-lg">&larr;</button>
@@ -414,9 +413,12 @@
                 if (localData) {
                     try {
                         this.db = JSON.parse(localData);
-                        if (!this.db.chapters) this.db.chapters = [];
+                        if (!this.db.chapters || this.db.chapters.length === 0) {
+                            this.showStartupModal();
+                            return;
+                        }
                         this.applySettings();
-                        this.renderChapters();
+                        this.showScreen('home');
                         this.updateSyncStatus("Lokal gespeichert");
                     } catch(e) {
                         this.showStartupModal();
@@ -451,7 +453,7 @@
                         ]
                     };
                     this.persist();
-                    this.renderChapters();
+                    this.showScreen('home');
                 }
             }
 
@@ -469,7 +471,7 @@
                     if (isInitial && !cloudBackup) {
                         this.persist();
                         this.updateSyncStatus("Cloud leer - Lokal initialisiert");
-                        this.renderChapters();
+                        this.showScreen('home');
                         return;
                     }
                     if (!cloudBackup || isInitial) {
@@ -480,14 +482,16 @@
                     }
                     this.db.lastSynced = new Date().toISOString();
                     this.updateSyncStatus("Google Drive Sync OK");
-                    this.renderChapters();
+                    this.showScreen('home');
                     if (!isInitial) alert("Google Drive Synchronisation erfolgreich!");
                 }, 800);
             }
 
             showScreen(screenName) {
                 ['home', 'editor', 'test-setup', 'test-active', 'test-summary', 'shooter'].forEach(s => {
-                    document.getElementById(`screen-${s}`).classList.add('hidden'); }); document.getElementById(`screen-${screenName}`).classList.remove('hidden');
+                    document.getElementById(`screen-${s}`).classList.add('hidden');
+                });
+                document.getElementById(`screen-${screenName}`).classList.remove('hidden');
                 if (screenName === 'home') this.renderChapters();
             }
 
@@ -513,4 +517,575 @@
                         </div>
                         <div class="flex items-center justify-between pt-2 border-t border-slate-800">
                             <button onclick="app.openChapter('${chap.id}')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">&rarr; Öffnen & Testen</button>
-                            <div class="flex items-center space-
+                            <div class="flex items-center space-x-2">
+                                <button onclick="app.currentChapterId='${chap.id}'; app.openRenameChapterModal();" class="p-2 text-gray-400 hover:text-white" title="Umbenennen">✏️</button>
+                                <button onclick="app.deleteChapter('${chap.id}')" class="p-2 text-red-400 hover:text-red-300" title="Löschen">🗑️</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+
+            openChapter(chapterId) {
+                this.currentChapterId = chapterId;
+                const chap = this.db.chapters.find(c => c.id === chapterId);
+                if (!chap) return;
+
+                document.getElementById('editor-chapter-title').innerText = chap.title;
+                document.getElementById('editor-chapter-subtitle').innerText = `Zielsprache: ${chap.targetLanguage} • ${chap.vocabularies.length} Vokabeln`;
+                
+                const listContainer = document.getElementById('vocab-list-container');
+                listContainer.innerHTML = '';
+
+                if (chap.vocabularies.length === 0) {
+                    listContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-6">Noch keine Vokabeln in diesem Kapitel.</p>`;
+                } else {
+                    chap.vocabularies.forEach(vocab => {
+                        const item = document.createElement('div');
+                        item.className = "p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between";
+                        item.innerHTML = `
+                            <div>
+                                <span class="font-bold text-white">${vocab.baseWord}</span>
+                                <span class="text-xs text-gray-400 block mt-0.5">Bedeutungen: ${vocab.targetMeanings.join(', ')}</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <button onclick="app.openEditVocabModal('${vocab.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-gray-300">Bearbeiten</button>
+                                <button onclick="app.deleteVocab('${vocab.id}')" class="px-3 py-1 rounded-lg bg-red-900/30 hover:bg-red-900/50 text-xs text-red-300">Löschen</button>
+                            </div>
+                        `;
+                        listContainer.appendChild(item);
+                    });
+                }
+                this.showScreen('editor');
+            }
+
+            openNewChapterModal() {
+                this.currentChapterId = null;
+                document.getElementById('modal-chapter-title').innerText = "Neues Kapitel erstellen";
+                document.getElementById('form-chapter').reset();
+                document.getElementById('modal-chapter').classList.remove('hidden');
+            }
+
+            openRenameChapterModal() {
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                if (!chap) return;
+                document.getElementById('input-rename-value').value = chap.title;
+                document.getElementById('modal-rename-chapter').classList.remove('hidden');
+            }
+
+            saveRenamedChapter(event) {
+                event.preventDefault();
+                const newName = document.getElementById('input-rename-value').value.trim();
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                if (chap) {
+                    chap.title = newName;
+                    this.persist();
+                    this.closeModal('modal-rename-chapter');
+                    this.openChapter(this.currentChapterId);
+                }
+            }
+
+            saveChapter(event) {
+                event.preventDefault();
+                const name = document.getElementById('input-chapter-name').value.trim();
+                const targetLang = document.getElementById('input-chapter-target-lang').value;
+
+                const newChap = {
+                    id: 'chap_' + Date.now(),
+                    title: name,
+                    targetLanguage: targetLang,
+                    createdAt: new Date().toISOString(),
+                    vocabularies: []
+                };
+                this.db.chapters.push(newChap);
+                this.currentChapterId = newChap.id;
+                this.persist();
+                this.closeModal('modal-chapter');
+                this.openChapter(this.currentChapterId);
+            }
+
+            deleteChapter(chapterId) {
+                if (confirm("Möchtest du dieses Kapitel wirklich löschen?")) {
+                    this.db.chapters = this.db.chapters.filter(c => c.id !== chapterId);
+                    this.persist();
+                    this.renderChapters();
+                }
+            }
+
+            openAddVocabModal() {
+                document.getElementById('modal-vocab-title').innerText = "Vokabel hinzufügen";
+                document.getElementById('form-vocab').reset();
+                document.getElementById('input-vocab-id').value = '';
+                document.getElementById('meanings-container').innerHTML = '';
+                this.addMeaningField();
+                document.getElementById('modal-vocab').classList.remove('hidden');
+            }
+
+            openEditVocabModal(vocabId) {
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                const vocab = chap.vocabularies.find(v => v.id === vocabId);
+                if (!vocab) return;
+
+                document.getElementById('modal-vocab-title').innerText = "Vokabel bearbeiten";
+                document.getElementById('input-vocab-id').value = vocab.id;
+                document.getElementById('input-vocab-base').value = vocab.baseWord;
+                
+                const container = document.getElementById('meanings-container');
+                container.innerHTML = '';
+                vocab.targetMeanings.forEach(m => this.addMeaningField(m));
+
+                document.getElementById('modal-vocab').classList.remove('hidden');
+            }
+
+            addMeaningField(value = '') {
+                const container = document.getElementById('meanings-container');
+                const div = document.createElement('div');
+                div.className = "flex items-center space-x-2";
+                div.innerHTML = `
+                    <input type="text" value="${value}" placeholder="z.B. house" required class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 meaning-input">
+                    <button type="button" onclick="this.parentElement.remove()" class="p-2 bg-red-900/30 hover:bg-red-900/50 text-red-300 rounded-xl text-xs">✕</button>
+                `;
+                container.appendChild(div);
+            }
+
+            saveVocab(event) {
+                event.preventDefault();
+                const vocabId = document.getElementById('input-vocab-id').value;
+                const baseWord = document.getElementById('input-vocab-base').value.trim();
+                
+                const meaningInputs = document.querySelectorAll('.meaning-input');
+                let targetMeanings = [];
+                meaningInputs.forEach(input => {
+                    const val = input.value.trim();
+                    if (val.length > 0) targetMeanings.push(val);
+                });
+
+                if (targetMeanings.length === 0) {
+                    alert("Bitte gib mindestens eine Bedeutung an.");
+                    return;
+                }
+
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+
+                if (vocabId) {
+                    const vocab = chap.vocabularies.find(v => v.id === vocabId);
+                    if (vocab) { vocab.baseWord = baseWord; vocab.targetMeanings = targetMeanings; }
+                } else {
+                    chap.vocabularies.push({ id: 'v_' + Date.now(), baseWord, targetMeanings });
+                }
+
+                this.persist();
+                this.closeModal('modal-vocab');
+                this.openChapter(this.currentChapterId);
+            }
+
+            deleteVocab(vocabId) {
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                chap.vocabularies = chap.vocabularies.filter(v => v.id !== vocabId);
+                this.persist();
+                this.openChapter(this.currentChapterId);
+            }
+
+            closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+            openSettingsModal() {
+                document.getElementById('settings-font-size').value = this.db.fontSize || 'text-size-md';
+                document.getElementById('settings-gdrive-key').value = this.db.gdriveKey || '';
+                document.getElementById('modal-settings').classList.remove('hidden');
+            }
+            applySettings() {
+                document.getElementById('body-root').className = `min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white ${this.db.fontSize || 'text-size-md'}`;
+            }
+            saveSettings() {
+                this.db.fontSize = document.getElementById('settings-font-size').value;
+                this.db.gdriveKey = document.getElementById('settings-gdrive-key').value;
+                this.persist();
+                this.closeModal('modal-settings');
+                alert("Einstellungen gespeichert!");
+            }
+
+            startTestSetup() {
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                if (!chap || chap.vocabularies.length === 0) { alert("Dieses Kapitel enthält keine Vokabeln!"); return; }
+                this.showScreen('test-setup');
+            }
+
+            launchTestSession(subsetVocabs = null) {
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                const direction = document.getElementById('test-direction').value;
+                const order = document.getElementById('test-order').value;
+                const timerLimit = parseInt(document.getElementById('test-timer').value);
+                const hangmanEnabled = document.getElementById('test-hangman').checked;
+
+                let vocabsToTest = subsetVocabs ? [...subsetVocabs] : [...chap.vocabularies];
+                if (order === 'shuffle') vocabsToTest.sort(() => Math.random() - 0.5);
+
+                this.activeTest = {
+                    chapterId: this.currentChapterId, direction, order, timerLimit, hangmanEnabled,
+                    questions: vocabsToTest, currentIndex: 0, currentMeaningIndex: 0,
+                    correctCount: 0, wrongCount: 0, wrongVocabList: [], currentTimerInterval: null,
+                    timeLeft: timerLimit, hangmanErrors: 0
+                };
+
+                if (hangmanEnabled) {
+                    document.getElementById('hangman-box').classList.remove('hidden');
+                    this.drawHangman(0);
+                } else {
+                    document.getElementById('hangman-box').classList.add('hidden');
+                }
+
+                if (timerLimit > 0) document.getElementById('timer-container').classList.remove('hidden');
+                else document.getElementById('timer-container').classList.add('hidden');
+
+                this.showScreen('test-active');
+                this.loadTestQuestion();
+            }
+
+            loadTestQuestion() {
+                if (this.activeTest.currentIndex >= this.activeTest.questions.length) {
+                    this.finishTestSession();
+                    return;
+                }
+
+                const vocab = this.activeTest.questions[this.activeTest.currentIndex];
+                const total = this.activeTest.questions.length;
+                document.getElementById('test-progress-text').innerText = `Frage ${this.activeTest.currentIndex + 1} von ${total} (Bedeutung ${this.activeTest.currentMeaningIndex + 1}/${vocab.targetMeanings.length})`;
+                document.getElementById('test-score-counter').innerText = `Richtig: ${this.activeTest.correctCount} | Falsch: ${this.activeTest.wrongCount}`;
+
+                let chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                let dir = this.activeTest.direction === 'mixed' ? (Math.random() > 0.5 ? 'de-to-target' : 'target-to-de') : this.activeTest.direction;
+
+                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? vocab.baseWord : vocab.targetMeanings[this.activeTest.currentMeaningIndex];
+                document.getElementById('test-sub-prompt').innerText = (dir === 'de-to-target') ? `Übersetze ins ${chap.targetLanguage} (Bedeutung ${this.activeTest.currentMeaningIndex + 1} von ${vocab.targetMeanings.length})` : `Übersetze ins Deutsche`;
+                document.getElementById('test-direction-label').innerText = (dir === 'de-to-target') ? `Deutsch &rarr; ${chap.targetLanguage}` : `${chap.targetLanguage} &rarr; Deutsch`;
+
+                document.getElementById('test-input-answer').value = '';
+                document.getElementById('test-feedback-area').classList.add('hidden');
+
+                if (this.activeTest.timerLimit > 0) this.startTimer();
+            }
+
+            startTimer() {
+                if (this.activeTest.currentTimerInterval) clearInterval(this.activeTest.currentTimerInterval);
+                this.activeTest.timeLeft = this.activeTest.timerLimit;
+                const timerBar = document.getElementById('timer-bar');
+                timerBar.style.width = '100%';
+
+                this.activeTest.currentTimerInterval = setInterval(() => {
+                    this.activeTest.timeLeft--;
+                    timerBar.style.width = `${(this.activeTest.timeLeft / this.activeTest.timerLimit) * 100}%`;
+                    if (this.activeTest.timeLeft <= 0) {
+                        clearInterval(this.activeTest.currentTimerInterval);
+                        this.handleTimeOut();
+                    }
+                }, 1000);
+            }
+
+            handleTimeOut() {
+                audioFX.error();
+                const vocab = this.activeTest.questions[this.activeTest.currentIndex];
+                this.activeTest.wrongCount++;
+                if (!this.activeTest.wrongVocabList.some(v => v.id === vocab.id)) this.activeTest.wrongVocabList.push(vocab);
+
+                if (this.activeTest.hangmanEnabled) {
+                    this.activeTest.hangmanErrors++;
+                    this.drawHangman(this.activeTest.hangmanErrors);
+                    if (this.activeTest.hangmanErrors >= 6) { this.failTestByHangman(); return; }
+                }
+
+                const fb = document.getElementById('test-feedback-area');
+                fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
+                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Korrekte Bedeutung: <strong>${vocab.targetMeanings[this.activeTest.currentMeaningIndex]}</strong>`;
+                fb.classList.remove('hidden');
+
+                setTimeout(() => {
+                    this.advanceMeaningOrNextWord(vocab);
+                }, 2500);
+            }
+
+            submitAnswer(event) {
+                event.preventDefault();
+                if (this.activeTest.currentTimerInterval) clearInterval(this.activeTest.currentTimerInterval);
+
+                const inputVal = document.getElementById('test-input-answer').value.trim();
+                const vocab = this.activeTest.questions[this.activeTest.currentIndex];
+                const dir = this.activeTest.direction === 'mixed' ? 'de-to-target' : this.activeTest.direction;
+
+                const expectedMeaning = vocab.targetMeanings[this.activeTest.currentMeaningIndex].trim();
+                const isCorrect = (dir === 'de-to-target') 
+                    ? (inputVal === expectedMeaning)
+                    : (vocab.baseWord.trim() === inputVal);
+                
+                const fb = document.getElementById('test-feedback-area');
+
+                if (isCorrect) {
+                    audioFX.success();
+                    this.activeTest.correctCount++;
+                    fb.className = "p-4 rounded-xl text-sm font-medium bg-emerald-900/30 border border-emerald-500/50 text-emerald-300";
+                    fb.innerHTML = `<strong>Richtig!</strong> Ausgezeichnet.`;
+                    fb.classList.remove('hidden');
+                    setTimeout(() => {
+                        this.advanceMeaningOrNextWord(vocab);
+                    }, 1200);
+                } else {
+                    audioFX.error();
+                    this.activeTest.wrongCount++;
+                    if (!this.activeTest.wrongVocabList.some(v => v.id === vocab.id)) this.activeTest.wrongVocabList.push(vocab);
+
+                    if (this.activeTest.hangmanEnabled) {
+                        this.activeTest.hangmanErrors++;
+                        this.drawHangman(this.activeTest.hangmanErrors);
+                        if (this.activeTest.hangmanErrors >= 6) { this.failTestByHangman(); return; }
+                    }
+
+                    fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
+                    fb.innerHTML = `<strong>Falsch!</strong> Gesuchte Bedeutung war: <strong>${vocab.targetMeanings[this.activeTest.currentMeaningIndex]}</strong> (Alle: ${vocab.targetMeanings.join(', ')})`;
+                    fb.classList.remove('hidden');
+                    setTimeout(() => {
+                        this.advanceMeaningOrNextWord(vocab);
+                    }, 3000);
+                }
+            }
+
+            advanceMeaningOrNextWord(vocab) {
+                this.activeTest.currentMeaningIndex++;
+                if (this.activeTest.currentMeaningIndex >= vocab.targetMeanings.length) {
+                    this.activeTest.currentMeaningIndex = 0;
+                    this.activeTest.currentIndex++;
+                }
+                this.loadTestQuestion();
+            }
+
+            drawHangman(errors) {
+                const canvas = document.getElementById('hangman-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 3;
+
+                ctx.beginPath();
+                ctx.moveTo(20, 130); ctx.lineTo(100, 130);
+                ctx.moveTo(40, 130); ctx.lineTo(40, 15);
+                ctx.lineTo(95, 15);
+                ctx.lineTo(95, 35);
+                ctx.stroke();
+
+                if (errors >= 1) { ctx.beginPath(); ctx.arc(95, 48, 12, 0, Math.PI * 2); ctx.stroke(); }
+                if (errors >= 2) { ctx.beginPath(); ctx.moveTo(95, 60); ctx.lineTo(95, 95); ctx.stroke(); }
+                if (errors >= 3) { ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(75, 85); ctx.stroke(); }
+                if (errors >= 4) { ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(115, 85); ctx.stroke(); }
+                if (errors >= 5) { ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(80, 120); ctx.stroke(); }
+                if (errors >= 6) { ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(110, 120); ctx.stroke(); }
+            }
+
+            failTestByHangman() {
+                alert("Hangman ist komplett! Test nicht bestanden.");
+                this.finishTestSession(true);
+            }
+
+            finishTestSession(failedByHangman = false) {
+                if (this.activeTest.currentTimerInterval) clearInterval(this.activeTest.currentTimerInterval);
+                this.showScreen('test-summary');
+
+                const total = this.activeTest.correctCount + this.activeTest.wrongCount;
+                const accuracy = total > 0 ? Math.round((this.activeTest.correctCount / total) * 100) : 0;
+
+                document.getElementById('summary-accuracy').innerText = `${accuracy}%`;
+                document.getElementById('summary-correct').innerText = this.activeTest.correctCount;
+                document.getElementById('summary-wrong').innerText = this.activeTest.wrongCount;
+
+                let grade = (failedByHangman || accuracy < 50) ? 6 : (accuracy >= 95 ? 1 : (accuracy >= 85 ? 2 : (accuracy >= 75 ? 3 : (accuracy >= 60 ? 4 : 5))));
+                document.getElementById('summary-grade-badge').innerText = grade;
+                document.getElementById('summary-subtitle').innerText = grade === 1 ? "Hervorragende Leistung! 🏆" : "Gut gemacht!";
+
+                document.getElementById('shooter-unlock-box').classList.toggle('hidden', !(accuracy > 90 && !failedByHangman));
+                document.getElementById('btn-retry-mistakes').classList.toggle('hidden', this.activeTest.wrongVocabList.length === 0);
+            }
+
+            startMistakesFollowUp() {
+                if (this.activeTest.wrongVocabList.length > 0) this.launchTestSession([...this.activeTest.wrongVocabList]);
+            }
+
+            launchSciFiShooter() {
+                this.showScreen('shooter');
+                const canvas = document.getElementById('shooter-canvas');
+                const ctx = canvas.getContext('2d');
+
+                this.shooterGame = {
+                    active: true, score: 0, health: 100,
+                    ship: { x: 350, y: 320, speed: 7 },
+                    lasers: [], enemies: [], particles: [],
+                    keys: {}, touchState: { left: false, right: false }
+                };
+
+                window.onkeydown = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = true; if (e.code === 'Space') { e.preventDefault(); this.fireShooterLaser(); } };
+                window.onkeyup = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = false; };
+
+                canvas.onmousemove = (e) => {
+                    const rect = canvas.getBoundingClientRect();
+                    if (this.shooterGame) {
+                        this.shooterGame.ship.x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    }
+                };
+
+                canvas.ontouchmove = (e) => {
+                    e.preventDefault();
+                    const rect = canvas.getBoundingClientRect();
+                    if (e.touches.length > 0 && this.shooterGame) {
+                        this.shooterGame.ship.x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width);
+                    }
+                };
+
+                const btnLeft = document.getElementById('touch-left');
+                const btnRight = document.getElementById('touch-right');
+                const btnFire = document.getElementById('touch-fire');
+
+                btnLeft.ontouchstart = (e) => { e.preventDefault(); this.shooterGame.touchState.left = true; };
+                btnLeft.ontouchend = () => { this.shooterGame.touchState.left = false; };
+                btnRight.ontouchstart = (e) => { e.preventDefault(); this.shooterGame.touchState.right = true; };
+                btnRight.ontouchend = () => { this.shooterGame.touchState.right = false; };
+                btnFire.ontouchstart = (e) => { e.preventDefault(); this.fireShooterLaser(); };
+                btnFire.onclick = () => { this.fireShooterLaser(); };
+
+                let enemyTimer = 0;
+                const loop = () => {
+                    if (!this.shooterGame || !this.shooterGame.active) return;
+                    const g = this.shooterGame;
+
+                    if (g.keys['ArrowLeft'] || g.keys['KeyA'] || g.touchState.left) g.ship.x -= g.ship.speed;
+                    if (g.keys['ArrowRight'] || g.keys['KeyD'] || g.touchState.right) g.ship.x += g.ship.speed;
+                    if (g.ship.x < 25) g.ship.x = 25;
+                    if (g.ship.x > canvas.width - 25) g.ship.x = canvas.width - 25;
+
+                    g.lasers.forEach(l => l.y -= 10);
+                    g.lasers = g.lasers.filter(l => l.y > 0);
+
+                    enemyTimer++;
+                    if (enemyTimer > 30) {
+                        enemyTimer = 0;
+                        g.enemies.push({
+                            x: Math.random() * (canvas.width - 60) + 30,
+                            y: -25,
+                            speed: Math.random() * 2 + 2,
+                            size: Math.random() * 8 + 14,
+                            type: Math.random() > 0.5 ? 'drone' : 'asteroid'
+                        });
+                    }
+
+                    g.enemies.forEach(e => e.y += e.speed);
+
+                    g.lasers.forEach((l, li) => {
+                        g.enemies.forEach((e, ei) => {
+                            if (Math.hypot(l.x - e.x, l.y - e.y) < e.size + 8) {
+                                audioFX.explosion();
+                                g.score += e.type === 'drone' ? 200 : 100;
+                                document.getElementById('shooter-score').innerText = g.score;
+                                
+                                for(let i=0; i<8; i++) {
+                                    g.particles.push({ x: e.x, y: e.y, vx: (Math.random()-0.5)*7, vy: (Math.random()-0.5)*7, life: 18 });
+                                }
+
+                                g.enemies.splice(ei, 1);
+                                g.lasers.splice(li, 1);
+                            }
+                        });
+                    });
+
+                    g.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
+                    g.particles = g.particles.filter(p => p.life > 0);
+
+                    g.enemies.forEach((e, ei) => {
+                        if (e.y > canvas.height) {
+                            g.enemies.splice(ei, 1);
+                            g.health -= 15;
+                            document.getElementById('shooter-health').innerText = `${g.health}%`;
+                            if (g.health <= 0) {
+                                audioFX.error();
+                                alert(`Game Over! Dein Highscore: ${g.score}`);
+                                this.exitSciFiShooter();
+                            }
+                        }
+                    });
+
+                    ctx.fillStyle = '#030712';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    ctx.fillStyle = '#38bdf8';
+                    for(let i=0; i<35; i++) {
+                        let sx = (i * 41 + Date.now() * 0.05) % canvas.width;
+                        let sy = (i * 59) % canvas.height;
+                        ctx.fillRect(sx, sy, 1.8, 1.8);
+                    }
+
+                    ctx.save();
+                    ctx.translate(g.ship.x, g.ship.y);
+                    ctx.fillStyle = '#06b6d4';
+                    ctx.shadowColor = '#06b6d4';
+                    ctx.shadowBlur = 15;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -20);
+                    ctx.lineTo(16, 16);
+                    ctx.lineTo(0, 10);
+                    ctx.lineTo(-16, 16);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.beginPath();
+                    ctx.moveTo(-6, 16);
+                    ctx.lineTo(0, 26 + Math.random() * 6);
+                    ctx.lineTo(6, 16);
+                    ctx.fill();
+                    ctx.restore();
+
+                    ctx.fillStyle = '#22d3ee';
+                    ctx.shadowColor = '#22d3ee';
+                    ctx.shadowBlur = 10;
+                    g.lasers.forEach(l => ctx.fillRect(l.x - 2.5, l.y, 5, 14));
+
+                    g.enemies.forEach(e => {
+                        ctx.save();
+                        ctx.translate(e.x, e.y);
+                        if (e.type === 'drone') {
+                            ctx.fillStyle = '#f43f5e';
+                            ctx.shadowColor = '#f43f5e';
+                            ctx.shadowBlur = 12;
+                            ctx.beginPath(); ctx.arc(0, 0, e.size, 0, Math.PI * 2); ctx.fill();
+                        } else {
+                            ctx.fillStyle = '#64748b';
+                            ctx.shadowColor = '#64748b';
+                            ctx.shadowBlur = 6;
+                            ctx.beginPath();
+                            ctx.arc(0, 0, e.size, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                        ctx.restore();
+                    });
+
+                    g.particles.forEach(p => {
+                        ctx.fillStyle = '#c084fc';
+                        ctx.fillRect(p.x, p.y, 3.5, 3.5);
+                    });
+
+                    requestAnimationFrame(loop);
+                };
+                requestAnimationFrame(loop);
+            }
+
+            fireShooterLaser() {
+                if (!this.shooterGame) return;
+                audioFX.laser();
+                this.shooterGame.lasers.push({ x: this.shooterGame.ship.x, y: this.shooterGame.ship.y - 20 });
+            }
+
+            exitSciFiShooter() {
+                if (this.shooterGame) this.shooterGame.active = false;
+                this.showScreen('test-summary');
+            }
+        }
+
+        const app = new LanguageStarApp();
+    </script>
+</body>
+</html>
