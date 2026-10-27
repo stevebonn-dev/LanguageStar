@@ -19,7 +19,6 @@
         .text-size-md { font-size: 16px; }
         .text-size-lg { font-size: 19px; }
         .text-size-xl { font-size: 22px; }
-        /* Lowercase default helper */
         .lowercase-input { text-transform: lowercase; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
@@ -36,7 +35,7 @@
             </div>
             <div>
                 <h1 class="font-orbitron font-bold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-300">LANGUAGE STAR+</h1>
-                <p class="text-xs text-gray-400">German Base • Separate Chapters</p>
+                <p class="text-xs text-gray-400">German Base • Separate Meanings</p>
             </div>
         </div>
 
@@ -71,7 +70,7 @@
             </div>
         </div>
 
-        <!-- SCREEN 1: HOME / CHAPTER FILE OVERVIEW -->
+        <!-- SCREEN 1: HOME / CHAPTER OVERVIEW -->
         <div id="screen-home" class="space-y-6">
             <div class="glass-panel rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-500/20">
                 <div>
@@ -85,8 +84,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Chapter File Section Grid -->
             <div id="chapters-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
 
@@ -106,7 +103,7 @@
             </div>
 
             <div class="glass-panel rounded-2xl p-6 border border-gray-800">
-                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste (Lowercase standard)</h3>
+                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste</h3>
                 <div id="vocab-list-container" class="space-y-3"></div>
             </div>
         </div>
@@ -245,7 +242,7 @@
 
     </main>
 
-    <!-- MODALS: CHAPTER, RENAME, VOCAB, SETTINGS -->
+    <!-- MODALS: CHAPTER, RENAME, VOCAB (WITH SEPARATE MEANINGS), SETTINGS -->
     <div id="modal-chapter" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
             <h3 id="modal-chapter-title" class="font-orbitron font-bold text-xl text-white mb-4">Neues Kapitel erstellen</h3>
@@ -289,19 +286,27 @@
         </div>
     </div>
 
+    <!-- VOCAB MODAL WITH SEPARATE MEANINGS INPUTS -->
     <div id="modal-vocab" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
-        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
-            <h3 id="modal-vocab-title" class="font-orbitron font-bold text-xl text-white mb-4">Vokabel hinzufügen</h3>
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow space-y-4 max-h-[90vh] overflow-y-auto">
+            <h3 id="modal-vocab-title" class="font-orbitron font-bold text-xl text-white">Vokabel hinzufügen</h3>
             <form id="form-vocab" onsubmit="app.saveVocab(event)" class="space-y-4">
                 <input type="hidden" id="input-vocab-id">
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort (Standard: Kleinbuchstaben)</label>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort (Base)</label>
                     <input type="text" id="input-vocab-base" required placeholder="z.B. haus" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
                 </div>
+                
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Bedeutungen Zielsprache (Komma-getrennt)</label>
-                    <input type="text" id="input-vocab-targets" required placeholder="z.B. house, home" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-sm font-medium text-gray-300">Bedeutungen in Zielsprache (Separate Felder)</label>
+                        <button type="button" onclick="app.addMeaningField()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">+ Weitere Bedeutung</button>
+                    </div>
+                    <div id="meanings-container" class="space-y-2">
+                        <!-- Dynamically populated meaning input fields -->
+                    </div>
                 </div>
+
                 <div class="flex items-center justify-end space-x-3 pt-3">
                     <button type="button" onclick="app.closeModal('modal-vocab')" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
                     <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Speichern</button>
@@ -593,6 +598,8 @@
                 document.getElementById('modal-vocab-title').innerText = "Vokabel hinzufügen";
                 document.getElementById('form-vocab').reset();
                 document.getElementById('input-vocab-id').value = '';
+                document.getElementById('meanings-container').innerHTML = '';
+                this.addMeaningField(); // Add initial field
                 document.getElementById('modal-vocab').classList.remove('hidden');
             }
 
@@ -604,16 +611,41 @@
                 document.getElementById('modal-vocab-title').innerText = "Vokabel bearbeiten";
                 document.getElementById('input-vocab-id').value = vocab.id;
                 document.getElementById('input-vocab-base').value = vocab.baseWord;
-                document.getElementById('input-vocab-targets').value = vocab.targetMeanings.join(', ');
+                
+                const container = document.getElementById('meanings-container');
+                container.innerHTML = '';
+                vocab.targetMeanings.forEach(m => this.addMeaningField(m));
+
                 document.getElementById('modal-vocab').classList.remove('hidden');
+            }
+
+            addMeaningField(value = '') {
+                const container = document.getElementById('meanings-container');
+                const div = document.createElement('div');
+                div.className = "flex items-center space-x-2";
+                div.innerHTML = `
+                    <input type="text" value="${value}" placeholder="z.B. house" required class="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white lowercase-input focus:outline-none focus:border-indigo-500 meaning-input">
+                    <button type="button" onclick="this.parentElement.remove()" class="p-2 bg-red-900/30 hover:bg-red-900/50 text-red-300 rounded-xl text-xs">✕</button>
+                `;
+                container.appendChild(div);
             }
 
             saveVocab(event) {
                 event.preventDefault();
                 const vocabId = document.getElementById('input-vocab-id').value;
                 const baseWord = document.getElementById('input-vocab-base').value.trim().toLowerCase();
-                const targetStr = document.getElementById('input-vocab-targets').value;
-                const targetMeanings = targetStr.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+                
+                const meaningInputs = document.querySelectorAll('.meaning-input');
+                let targetMeanings = [];
+                meaningInputs.forEach(input => {
+                    const val = input.value.trim().toLowerCase();
+                    if (val.length > 0) targetMeanings.push(val);
+                });
+
+                if (targetMeanings.length === 0) {
+                    alert("Bitte gib mindestens eine Bedeutung an.");
+                    return;
+                }
 
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
 
@@ -753,11 +785,14 @@
                 event.preventDefault();
                 if (this.activeTest.currentTimerInterval) clearInterval(this.activeTest.currentTimerInterval);
 
-                const inputVal = document.getElementById('test-input-answer').value.trim();
+                const inputVal = document.getElementById('test-input-answer').value.trim().toLowerCase();
                 const vocab = this.activeTest.questions[this.activeTest.currentIndex];
                 const dir = this.activeTest.direction === 'mixed' ? 'de-to-target' : this.activeTest.direction;
 
-                const isCorrect = (dir === 'de-to-target') ? vocab.targetMeanings.some(m => m === inputVal) : (vocab.baseWord === inputVal);
+                const isCorrect = (dir === 'de-to-target') 
+                    ? vocab.targetMeanings.some(m => m.trim().toLowerCase() === inputVal) 
+                    : (vocab.baseWord.trim().toLowerCase() === inputVal);
+                
                 const fb = document.getElementById('test-feedback-area');
 
                 if (isCorrect) {
@@ -793,7 +828,6 @@
                 ctx.strokeStyle = '#38bdf8';
                 ctx.lineWidth = 3;
 
-                // Gallows
                 ctx.beginPath();
                 ctx.moveTo(20, 130); ctx.lineTo(100, 130);
                 ctx.moveTo(40, 130); ctx.lineTo(40, 15);
@@ -801,25 +835,12 @@
                 ctx.lineTo(95, 35);
                 ctx.stroke();
 
-                // Body parts based on errors (1 to 6)
-                if (errors >= 1) { // Head
-                    ctx.beginPath(); ctx.arc(95, 48, 12, 0, Math.PI * 2); ctx.stroke();
-                }
-                if (errors >= 2) { // Torso
-                    ctx.beginPath(); ctx.moveTo(95, 60); ctx.lineTo(95, 95); ctx.stroke();
-                }
-                if (errors >= 3) { // Left Arm
-                    ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(75, 85); ctx.stroke();
-                }
-                if (errors >= 4) { // Right Arm
-                    ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(115, 85); ctx.stroke();
-                }
-                if (errors >= 5) { // Left Leg
-                    ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(80, 120); ctx.stroke();
-                }
-                if (errors >= 6) { // Right Leg
-                    ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(110, 120); ctx.stroke();
-                }
+                if (errors >= 1) { ctx.beginPath(); ctx.arc(95, 48, 12, 0, Math.PI * 2); ctx.stroke(); }
+                if (errors >= 2) { ctx.beginPath(); ctx.moveTo(95, 60); ctx.lineTo(95, 95); ctx.stroke(); }
+                if (errors >= 3) { ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(75, 85); ctx.stroke(); }
+                if (errors >= 4) { ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(115, 85); ctx.stroke(); }
+                if (errors >= 5) { ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(80, 120); ctx.stroke(); }
+                if (errors >= 6) { ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(110, 120); ctx.stroke(); }
             }
 
             failTestByHangman() {
@@ -911,7 +932,7 @@
                     g.lasers.forEach(l => ctx.fillRect(l.x - 2, l.y, 4, 10));
 
                     ctx.fillStyle = '#f43f5e';
-                    g.exports.forEach(e => { ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill(); }); // Fixed typo
+                    g.enemies.forEach(e => { ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill(); });
 
                     requestAnimationFrame(loop);
                 };
