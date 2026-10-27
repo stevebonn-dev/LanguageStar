@@ -15,11 +15,12 @@
         .neon-glow { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
         .neon-glow-green { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
         .neon-glow-red { box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
-        /* Font size scaling classes */
         .text-size-sm { font-size: 13px; }
         .text-size-md { font-size: 16px; }
         .text-size-lg { font-size: 19px; }
         .text-size-xl { font-size: 22px; }
+        /* Lowercase default helper */
+        .lowercase-input { text-transform: lowercase; }
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -44,11 +45,8 @@
                 <span id="sync-indicator" class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span id="sync-text">Lokal gespeichert</span>
             </div>
-            <button onclick="app.openSettingsModal()" class="p-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 transition-all" title="Einstellungen">
-                ⚙️
-            </button>
+            <button onclick="app.openSettingsModal()" class="p-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 border border-gray-700 text-gray-300 transition-all" title="Einstellungen">⚙️</button>
             <button onclick="app.triggerGoogleDriveSync()" class="flex items-center space-x-2 px-4 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/50 text-indigo-300 text-sm font-medium transition-all neon-glow">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h10a4 4 0 004-4M7 10l5 5 5-5M12 15V3"></path></svg>
                 <span class="hidden sm:inline">Google Drive</span>
             </button>
         </div>
@@ -57,64 +55,58 @@
     <!-- MAIN CONTAINER -->
     <main class="flex-grow max-w-5xl w-full mx-auto p-4 sm:p-6 my-4">
 
-        <!-- INITIAL STARTUP / SYNC MODAL -->
+        <!-- INITIAL STARTUP MODAL -->
         <div id="startup-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
             <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
                 <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-indigo-600/20 border border-indigo-500/40 rounded-2xl flex items-center justify-center mx-auto mb-3 text-indigo-400 text-2xl font-orbitron">★</div>
+                    <div class="w-16 h-16 bg-indigo-600/25 border border-indigo-500/40 rounded-2xl flex items-center justify-center mx-auto mb-3 text-indigo-400 text-2xl font-orbitron">★</div>
                     <h2 class="font-orbitron font-bold text-xl text-white">Datenbank-Initialisierung</h2>
-                    <p class="text-sm text-gray-400 mt-1">Keine lokale oder Cloud-Datenbank gefunden. Wie möchtest du starten?</p>
+                    <p class="text-sm text-gray-400 mt-1">Wie möchtest du starten?</p>
                 </div>
                 <div class="space-y-3">
-                    <button onclick="app.resolveStartup('cloud')" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium flex items-center justify-center space-x-2 transition-all neon-glow">
-                        <span>Aus Google Drive wiederherstellen</span>
-                    </button>
-                    <button onclick="app.resolveStartup('local')" class="w-full py-3 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium flex items-center justify-center space-x-2 border border-gray-700 transition-all">
-                        <span>Lokal gespeicherten Stand laden</span>
-                    </button>
-                    <button onclick="app.resolveStartup('fresh')" class="w-full py-3 px-4 rounded-xl bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white font-medium flex items-center justify-center space-x-2 border border-gray-800 transition-all">
-                        <span>Von vorne beginnen (Beispiel-Kapitel)</span>
-                    </button>
+                    <button onclick="app.resolveStartup('cloud')" class="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-all neon-glow">Aus Google Drive wiederherstellen</button>
+                    <button onclick="app.resolveStartup('local')" class="w-full py-3 px-4 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-200 font-medium border border-gray-700">Lokal gespeicherten Stand laden</button>
+                    <button onclick="app.resolveStartup('fresh')" class="w-full py-3 px-4 rounded-xl bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white font-medium border border-gray-800">Von vorne beginnen (Beispiel-Kapitel)</button>
                 </div>
             </div>
         </div>
 
-        <!-- SCREEN 1: HOME / CHAPTER OVERVIEW -->
+        <!-- SCREEN 1: HOME / CHAPTER FILE OVERVIEW -->
         <div id="screen-home" class="space-y-6">
             <div class="glass-panel rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-indigo-500/20">
                 <div>
-                    <h2 class="font-orbitron font-bold text-2xl text-white">Kapitel-Übersicht</h2>
-                    <p class="text-sm text-gray-400 mt-1">Alle Kapitel werden separat gespeichert und verwaltet.</p>
+                    <h2 class="font-orbitron font-bold text-2xl text-white">Kapitel- & Dateiverwaltung</h2>
+                    <p class="text-sm text-gray-400 mt-1">Wähle ein Kapitel aus, teste Vokabeln oder verwalte separate Einträge.</p>
                 </div>
                 <div class="flex items-center space-x-3 w-full md:w-auto">
-                    <button onclick="app.openNewChapterModal()" class="flex-1 md:flex-none px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-medium shadow-lg neon-glow transition-all flex items-center justify-center space-x-2">
+                    <button onclick="app.openNewChapterModal()" class="flex-1 md:flex-none px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 text-white font-medium shadow-lg neon-glow transition-all flex items-center justify-center space-x-2">
                         <span class="text-lg font-bold">+</span>
-                        <span>Neues Kapitel</span>
+                        <span>Neues Kapitel erstellen</span>
                     </button>
                 </div>
             </div>
 
-            <div id="chapters-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Dynamically populated chapters -->
-            </div>
+            <!-- Chapter File Section Grid -->
+            <div id="chapters-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
         </div>
 
         <!-- SCREEN 2: CHAPTER EDITOR -->
         <div id="screen-editor" class="space-y-6 hidden">
-            <div class="glass-panel rounded-2xl p-6 border border-gray-800 flex items-center justify-between">
+            <div class="glass-panel rounded-2xl p-6 border border-gray-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <button onclick="app.showScreen('home')" class="text-xs text-indigo-400 hover:underline mb-1 block">&larr; Zurück zur Übersicht</button>
+                    <button onclick="app.showScreen('home')" class="text-xs text-indigo-400 hover:underline mb-1 block">&larr; Zurück zur Kapitelübersicht</button>
                     <h2 id="editor-chapter-title" class="font-orbitron font-bold text-2xl text-white">Kapitel Name</h2>
                     <p id="editor-chapter-subtitle" class="text-sm text-gray-400">Zielsprache: Englisch • 0 Vokabeln</p>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="app.openRenameChapterModal()" class="px-3.5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-xs font-medium">Kapitel Umbenennen</button>
                     <button onclick="app.openAddVocabModal()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-sm font-medium transition-all">+ Vokabel</button>
                     <button onclick="app.startTestSetup()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm font-medium transition-all neon-glow-green">Test starten</button>
                 </div>
             </div>
 
             <div class="glass-panel rounded-2xl p-6 border border-gray-800">
-                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste</h3>
+                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste (Lowercase standard)</h3>
                 <div id="vocab-list-container" class="space-y-3"></div>
             </div>
         </div>
@@ -157,7 +149,7 @@
                     <div class="flex items-center justify-between p-4 bg-gray-900/60 rounded-xl border border-gray-800">
                         <div>
                             <span class="text-sm font-medium text-white block">Hangman-Modus</span>
-                            <span class="text-xs text-gray-400">Jeder Fehler fügt ein Teil hinzu.</span>
+                            <span class="text-xs text-gray-400">Jeder Fehler zeichnet den Hangman weiter.</span>
                         </div>
                         <input type="checkbox" id="test-hangman" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer">
                     </div>
@@ -180,19 +172,22 @@
                 <div id="test-score-counter" class="text-xs font-medium text-emerald-400">Richtig: 0 | Falsch: 0</div>
             </div>
 
+            <!-- Visual Hangman Canvas Box -->
             <div id="hangman-box" class="glass-panel rounded-2xl p-4 text-center hidden border border-red-500/30">
-                <div class="font-orbitron text-red-400 text-xs font-bold mb-2">HANGMAN (<span id="hangman-errors">0</span> / 6)</div>
-                <div id="hangman-ascii" class="font-mono text-cyan-300 text-sm tracking-widest bg-gray-900/80 p-3 rounded-xl border border-gray-800 inline-block">[      ]</div>
+                <div class="font-orbitron text-red-400 text-xs font-bold mb-2">HANGMAN STATUS (Fehler: <span id="hangman-errors">0</span> / 6)</div>
+                <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800 inline-block">
+                    <canvas id="hangman-canvas" width="160" height="140" class="block mx-auto"></canvas>
+                </div>
             </div>
 
-            <div class="glass-panel rounded-2xl p-8 text-center space-y-6 border border-indigo-500/20 relative overflow-hidden">
+            <div class="glass-panel rounded-2xl p-8 text-center space-y-6 border border-indigo-500/25 relative overflow-hidden">
                 <span id="test-direction-label" class="text-xs font-orbitron tracking-widest text-indigo-400 uppercase">Deutsch &rarr; Zielsprache</span>
                 <div class="py-4">
                     <h3 id="test-prompt-word" class="text-3xl font-bold font-orbitron text-white">Wort</h3>
-                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Übersetzung eingeben:</p>
+                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Übersetzung eingeben (Standard: Kleinbuchstaben):</p>
                 </div>
                 <form id="test-answer-form" onsubmit="app.submitAnswer(event)" class="space-y-4">
-                    <input type="text" id="test-input-answer" autocomplete="off" autofocus placeholder="Übersetzung..." class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
+                    <input type="text" id="test-input-answer" autocomplete="off" autofocus placeholder="Übersetzung eingeben..." class="w-full bg-gray-900/90 border border-gray-700 rounded-xl px-5 py-4 text-white text-center text-lg lowercase-input focus:outline-none focus:border-indigo-500 neon-glow">
                     <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium neon-glow">Antwort prüfen</button>
                 </form>
                 <div id="test-feedback-area" class="hidden p-4 rounded-xl text-sm font-medium"></div>
@@ -202,7 +197,7 @@
         <!-- SCREEN 5: TEST SUMMARY -->
         <div id="screen-test-summary" class="space-y-6 hidden max-w-2xl mx-auto text-center">
             <div class="glass-panel rounded-2xl p-8 border border-indigo-500/30 neon-glow space-y-6">
-                <div id="summary-grade-badge" class="w-20 h-20 bg-indigo-600/20 border border-indigo-500/40 rounded-3xl flex items-center justify-center mx-auto text-indigo-400 text-3xl font-orbitron">1</div>
+                <div id="summary-grade-badge" class="w-20 h-20 bg-indigo-600/25 border border-indigo-500/40 rounded-3xl flex items-center justify-center mx-auto text-indigo-400 text-3xl font-orbitron">1</div>
                 <div>
                     <h2 class="font-orbitron font-bold text-3xl text-white">Test Auswertung</h2>
                     <p id="summary-subtitle" class="text-sm text-gray-400 mt-1">Großartige Leistung!</p>
@@ -250,18 +245,18 @@
 
     </main>
 
-    <!-- MODALS: CHAPTER, VOCAB, SETTINGS -->
+    <!-- MODALS: CHAPTER, RENAME, VOCAB, SETTINGS -->
     <div id="modal-chapter" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
             <h3 id="modal-chapter-title" class="font-orbitron font-bold text-xl text-white mb-4">Neues Kapitel erstellen</h3>
             <form id="form-chapter" onsubmit="app.saveChapter(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Kapitel Name</label>
-                    <input type="text" id="input-chapter-name" required placeholder="z.B. Lektion 1: Grundlagen" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="input-chapter-name" required placeholder="z.B. lektion 1: grundlagen" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Zielsprache</label>
-                    <select id="input-chapter-target-lang" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                    <select id="input-chapter-target-lang" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white">
                         <option value="Englisch">Englisch</option>
                         <option value="Spanisch">Spanisch</option>
                         <option value="Französisch">Französisch</option>
@@ -277,18 +272,35 @@
         </div>
     </div>
 
+    <!-- RENAME CHAPTER MODAL -->
+    <div id="modal-rename-chapter" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
+            <h3 class="font-orbitron font-bold text-xl text-white mb-4">Kapitel Umbenennen</h3>
+            <form onsubmit="app.saveRenamedChapter(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Neuer Kapitel Name</label>
+                    <input type="text" id="input-rename-value" required class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex items-center justify-end space-x-3 pt-3">
+                    <button type="button" onclick="app.closeModal('modal-rename-chapter')" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Umbenennen</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="modal-vocab" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow">
             <h3 id="modal-vocab-title" class="font-orbitron font-bold text-xl text-white mb-4">Vokabel hinzufügen</h3>
             <form id="form-vocab" onsubmit="app.saveVocab(event)" class="space-y-4">
                 <input type="hidden" id="input-vocab-id">
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort</label>
-                    <input type="text" id="input-vocab-base" required placeholder="z.B. Haus" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort (Standard: Kleinbuchstaben)</label>
+                    <input type="text" id="input-vocab-base" required placeholder="z.B. haus" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Bedeutungen in Zielsprache (Komma-getrennt)</label>
-                    <input type="text" id="input-vocab-targets" required placeholder="z.B. house, home" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                    <label class="block text-sm font-medium text-gray-300 mb-1">Bedeutungen Zielsprache (Komma-getrennt)</label>
+                    <input type="text" id="input-vocab-targets" required placeholder="z.B. house, home" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white lowercase-input focus:outline-none focus:border-indigo-500">
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-3">
                     <button type="button" onclick="app.closeModal('modal-vocab')" class="px-4 py-2 rounded-xl bg-gray-800 text-gray-300 text-sm">Abbrechen</button>
@@ -302,38 +314,24 @@
     <div id="modal-settings" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel max-w-lg w-full rounded-2xl p-6 border border-indigo-500/30 neon-glow space-y-5">
             <h3 class="font-orbitron font-bold text-xl text-white">⚙️ App-Einstellungen</h3>
-            
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Schriftgröße</label>
-                    <select id="settings-font-size" onchange="app.updateFontSize(this.value)" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white">
+                    <select id="settings-font-size" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white">
                         <option value="text-size-sm">Klein</option>
                         <option value="text-size-md" selected>Normal</option>
                         <option value="text-size-lg">Groß</option>
                         <option value="text-size-xl">Sehr Groß</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Google Drive API Client ID / Key</label>
                     <input type="text" id="settings-gdrive-key" placeholder="z.B. AIzaSyD..." class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white text-sm">
-                    <p class="text-xs text-gray-400 mt-1">Hier kannst du deine Google Drive REST API Credentials eingeben.</p>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-300 mb-1">Standard-Timer (Sekunden)</label>
-                    <select id="settings-default-timer" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5 text-white">
-                        <option value="5">5s</option>
-                        <option value="10" selected>10s</option>
-                        <option value="15">15s</option>
-                        <option value="30">30s</option>
-                    </select>
                 </div>
             </div>
-
             <div class="flex items-center justify-end space-x-3 pt-3">
                 <button type="button" onclick="app.closeModal('modal-settings')" class="px-5 py-2.5 rounded-xl bg-gray-800 text-gray-300 text-sm">Schließen</button>
-                <button type="button" onclick="app.saveSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Einstellungen Speichern</button>
+                <button type="button" onclick="app.saveSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Speichern</button>
             </div>
         </div>
     </div>
@@ -381,19 +379,9 @@
                 };
                 this.currentChapterId = null;
                 this.activeTest = {
-                    chapterId: null,
-                    direction: 'de-to-target',
-                    order: 'sequential',
-                    timerLimit: 10,
-                    hangmanEnabled: false,
-                    questions: [],
-                    currentIndex: 0,
-                    correctCount: 0,
-                    wrongCount: 0,
-                    wrongVocabList: [],
-                    currentTimerInterval: null,
-                    timeLeft: 0,
-                    hangmanErrors: 0
+                    chapterId: null, direction: 'de-to-target', order: 'sequential', timerLimit: 10,
+                    hangmanEnabled: false, questions: [], currentIndex: 0, correctCount: 0, wrongCount: 0,
+                    wrongVocabList: [], currentTimerInterval: null, timeLeft: 0, hangmanErrors: 0
                 };
                 this.shooterGame = null;
                 this.initApp();
@@ -416,9 +404,7 @@
                 }
             }
 
-            showStartupModal() {
-                document.getElementById('startup-modal').classList.remove('hidden');
-            }
+            showStartupModal() { document.getElementById('startup-modal').classList.remove('hidden'); }
 
             resolveStartup(choice) {
                 document.getElementById('startup-modal').classList.add('hidden');
@@ -428,19 +414,16 @@
                     this.initApp();
                 } else {
                     this.db = {
-                        version: "1.0",
-                        lastSynced: null,
-                        gdriveKey: "",
-                        fontSize: "text-size-md",
+                        version: "1.0", lastSynced: null, gdriveKey: "", fontSize: "text-size-md",
                         chapters: [
                             {
                                 id: 'chap_' + Date.now() + '_1',
-                                title: 'Lektion 1: Grundlagen',
+                                title: 'lektion 1: grundlagen',
                                 targetLanguage: 'Englisch',
                                 createdAt: new Date().toISOString(),
                                 vocabularies: [
-                                    { id: 'v_1', baseWord: 'Haus', targetMeanings: ['house', 'home'] },
-                                    { id: 'v_2', baseWord: 'Auto', targetMeanings: ['car', 'automobile'] }
+                                    { id: 'v_1', baseWord: 'haus', targetMeanings: ['house', 'home'] },
+                                    { id: 'v_2', baseWord: 'auto', targetMeanings: ['car', 'automobile'] }
                                 ]
                             }
                         ]
@@ -455,9 +438,7 @@
                 this.updateSyncStatus("Lokal gespeichert");
             }
 
-            updateSyncStatus(text) {
-                document.getElementById('sync-text').innerText = text;
-            }
+            updateSyncStatus(text) { document.getElementById('sync-text').innerText = text; }
 
             triggerGoogleDriveSync(isInitial = false) {
                 this.updateSyncStatus("Synchronisiere mit Google Drive...");
@@ -469,7 +450,6 @@
                         this.renderChapters();
                         return;
                     }
-
                     if (!cloudBackup || isInitial) {
                         localStorage.setItem('language_star_gdrive_cloud', JSON.stringify(this.db));
                     } else {
@@ -506,7 +486,7 @@
                     card.innerHTML = `
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="px-3 py-1 rounded-full bg-indigo-600/20 border border-indigo-500/30 text-indigo-300 text-xs font-orbitron">${chap.targetLanguage}</span>
+                                <span class="px-3 py-1 rounded-full bg-indigo-600/25 border border-indigo-500/30 text-indigo-300 text-xs font-orbitron">${chap.targetLanguage}</span>
                                 <span class="text-xs text-gray-400">${chap.vocabularies.length} Vokabeln</span>
                             </div>
                             <h3 class="font-orbitron font-bold text-lg text-white">${chap.title}</h3>
@@ -514,7 +494,7 @@
                         <div class="flex items-center justify-between pt-2 border-t border-gray-800">
                             <button onclick="app.openChapter('${chap.id}')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">&rarr; Öffnen & Testen</button>
                             <div class="flex items-center space-x-2">
-                                <button onclick="app.editChapterModal('${chap.id}')" class="p-2 text-gray-400 hover:text-white" title="Bearbeiten">✏️</button>
+                                <button onclick="app.currentChapterId='${chap.id}'; app.openRenameChapterModal();" class="p-2 text-gray-400 hover:text-white" title="Umbenennen">✏️</button>
                                 <button onclick="app.deleteChapter('${chap.id}')" class="p-2 text-red-400 hover:text-red-300" title="Löschen">🗑️</button>
                             </div>
                         </div>
@@ -563,36 +543,39 @@
                 document.getElementById('modal-chapter').classList.remove('hidden');
             }
 
-            editChapterModal(chapterId) {
-                const chap = this.db.chapters.find(c => c.id === chapterId);
+            openRenameChapterModal() {
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
                 if (!chap) return;
-                this.currentChapterId = chapterId;
-                document.getElementById('modal-chapter-title').innerText = "Kapitel bearbeiten";
-                document.getElementById('input-chapter-name').value = chap.title;
-                document.getElementById('input-chapter-target-lang').value = chap.targetLanguage;
-                document.getElementById('modal-chapter').classList.remove('hidden');
+                document.getElementById('input-rename-value').value = chap.title;
+                document.getElementById('modal-rename-chapter').classList.remove('hidden');
+            }
+
+            saveRenamedChapter(event) {
+                event.preventDefault();
+                const newName = document.getElementById('input-rename-value').value.trim().toLowerCase();
+                const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
+                if (chap) {
+                    chap.title = newName;
+                    this.persist();
+                    this.closeModal('modal-rename-chapter');
+                    this.openChapter(this.currentChapterId);
+                }
             }
 
             saveChapter(event) {
                 event.preventDefault();
-                const name = document.getElementById('input-chapter-name').value;
+                const name = document.getElementById('input-chapter-name').value.trim().toLowerCase();
                 const targetLang = document.getElementById('input-chapter-target-lang').value;
 
-                if (this.currentChapterId && this.db.chapters.some(c => c.id === this.currentChapterId)) {
-                    const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
-                    chap.title = name;
-                    chap.targetLanguage = targetLang;
-                } else {
-                    const newChap = {
-                        id: 'chap_' + Date.now(),
-                        title: name,
-                        targetLanguage: targetLang,
-                        createdAt: new Date().toISOString(),
-                        vocabularies: []
-                    };
-                    this.db.chapters.push(newChap);
-                    this.currentChapterId = newChap.id;
-                }
+                const newChap = {
+                    id: 'chap_' + Date.now(),
+                    title: name,
+                    targetLanguage: targetLang,
+                    createdAt: new Date().toISOString(),
+                    vocabularies: []
+                };
+                this.db.chapters.push(newChap);
+                this.currentChapterId = newChap.id;
                 this.persist();
                 this.closeModal('modal-chapter');
                 this.openChapter(this.currentChapterId);
@@ -628,24 +611,17 @@
             saveVocab(event) {
                 event.preventDefault();
                 const vocabId = document.getElementById('input-vocab-id').value;
-                const baseWord = document.getElementById('input-vocab-base').value;
+                const baseWord = document.getElementById('input-vocab-base').value.trim().toLowerCase();
                 const targetStr = document.getElementById('input-vocab-targets').value;
-                const targetMeanings = targetStr.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                const targetMeanings = targetStr.split(',').map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
 
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
 
                 if (vocabId) {
                     const vocab = chap.vocabularies.find(v => v.id === vocabId);
-                    if (vocab) {
-                        vocab.baseWord = baseWord;
-                        vocab.targetMeanings = targetMeanings;
-                    }
+                    if (vocab) { vocab.baseWord = baseWord; vocab.targetMeanings = targetMeanings; }
                 } else {
-                    chap.vocabularies.push({
-                        id: 'v_' + Date.now(),
-                        baseWord: baseWord,
-                        targetMeanings: targetMeanings
-                    });
+                    chap.vocabularies.push({ id: 'v_' + Date.now(), baseWord, targetMeanings });
                 }
 
                 this.persist();
@@ -660,40 +636,26 @@
                 this.openChapter(this.currentChapterId);
             }
 
-            closeModal(modalId) {
-                document.getElementById(modalId).classList.add('hidden');
-            }
-
+            closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
             openSettingsModal() {
                 document.getElementById('settings-font-size').value = this.db.fontSize || 'text-size-md';
                 document.getElementById('settings-gdrive-key').value = this.db.gdriveKey || '';
                 document.getElementById('modal-settings').classList.remove('hidden');
             }
-
-            updateFontSize(sizeClass) {
-                this.db.fontSize = sizeClass;
-                this.applySettings();
-            }
-
             applySettings() {
-                const body = document.getElementById('body-root');
-                body.className = `min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white ${this.db.fontSize || 'text-size-md'}`;
+                document.getElementById('body-root').className = `min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white ${this.db.fontSize || 'text-size-md'}`;
             }
-
             saveSettings() {
                 this.db.fontSize = document.getElementById('settings-font-size').value;
                 this.db.gdriveKey = document.getElementById('settings-gdrive-key').value;
                 this.persist();
                 this.closeModal('modal-settings');
-                alert("Einstellungen erfolgreich gespeichert!");
+                alert("Einstellungen gespeichert!");
             }
 
             startTestSetup() {
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
-                if (!chap || chap.vocabularies.length === 0) {
-                    alert("Dieses Kapitel enthält keine Vokabeln!");
-                    return;
-                }
+                if (!chap || chap.vocabularies.length === 0) { alert("Dieses Kapitel enthält keine Vokabeln!"); return; }
                 this.showScreen('test-setup');
             }
 
@@ -708,30 +670,20 @@
                 if (order === 'shuffle') vocabsToTest.sort(() => Math.random() - 0.5);
 
                 this.activeTest = {
-                    chapterId: this.currentChapterId,
-                    direction, order, timerLimit, hangmanEnabled,
-                    questions: vocabsToTest,
-                    currentIndex: 0,
-                    correctCount: 0,
-                    wrongCount: 0,
-                    wrongVocabList: [],
-                    currentTimerInterval: null,
-                    timeLeft: timerLimit,
-                    hangmanErrors: 0
+                    chapterId: this.currentChapterId, direction, order, timerLimit, hangmanEnabled,
+                    questions: vocabsToTest, currentIndex: 0, correctCount: 0, wrongCount: 0,
+                    wrongVocabList: [], currentTimerInterval: null, timeLeft: timerLimit, hangmanErrors: 0
                 };
 
                 if (hangmanEnabled) {
                     document.getElementById('hangman-box').classList.remove('hidden');
-                    this.updateHangmanDisplay();
+                    this.drawHangman(0);
                 } else {
                     document.getElementById('hangman-box').classList.add('hidden');
                 }
 
-                if (timerLimit > 0) {
-                    document.getElementById('timer-container').classList.remove('hidden');
-                } else {
-                    document.getElementById('timer-container').classList.add('hidden');
-                }
+                if (timerLimit > 0) document.getElementById('timer-container').classList.remove('hidden');
+                else document.getElementById('timer-container').classList.add('hidden');
 
                 this.showScreen('test-active');
                 this.loadTestQuestion();
@@ -745,9 +697,7 @@
 
                 const vocab = this.activeTest.questions[this.activeTest.currentIndex];
                 const total = this.activeTest.questions.length;
-                const currentNum = this.activeTest.currentIndex + 1;
-
-                document.getElementById('test-progress-text').innerText = `Frage ${currentNum} von ${total}`;
+                document.getElementById('test-progress-text').innerText = `Frage ${this.activeTest.currentIndex + 1} von ${total}`;
                 document.getElementById('test-score-counter').innerText = `Richtig: ${this.activeTest.correctCount} | Falsch: ${this.activeTest.wrongCount}`;
 
                 let chap = this.db.chapters.find(c => c.id === this.currentChapterId);
@@ -787,33 +737,27 @@
 
                 if (this.activeTest.hangmanEnabled) {
                     this.activeTest.hangmanErrors++;
-                    this.updateHangmanDisplay();
-                    if (this.activeTest.hangmanErrors >= 6) {
-                        this.failTestByHangman();
-                        return;
-                    }
+                    this.drawHangman(this.activeTest.hangmanErrors);
+                    if (this.activeTest.hangmanErrors >= 6) { this.failTestByHangman(); return; }
                 }
 
                 const fb = document.getElementById('test-feedback-area');
                 fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Richtige Antwort: ${vocab.targetMeanings.join(', ')}`;
+                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Korrekt: ${vocab.targetMeanings.join(', ')}`;
                 fb.classList.remove('hidden');
 
-                setTimeout(() => {
-                    this.activeTest.currentIndex++;
-                    this.loadTestQuestion();
-                }, 2500);
+                setTimeout(() => { this.activeTest.currentIndex++; this.loadTestQuestion(); }, 2500);
             }
 
             submitAnswer(event) {
                 event.preventDefault();
                 if (this.activeTest.currentTimerInterval) clearInterval(this.activeTest.currentTimerInterval);
 
-                const inputVal = document.getElementById('test-input-answer').value.trim().toLowerCase();
+                const inputVal = document.getElementById('test-input-answer').value.trim();
                 const vocab = this.activeTest.questions[this.activeTest.currentIndex];
                 const dir = this.activeTest.direction === 'mixed' ? 'de-to-target' : this.activeTest.direction;
 
-                const isCorrect = (dir === 'de-to-target') ? vocab.targetMeanings.some(m => m.toLowerCase() === inputVal) : (vocab.baseWord.toLowerCase() === inputVal);
+                const isCorrect = (dir === 'de-to-target') ? vocab.targetMeanings.some(m => m === inputVal) : (vocab.baseWord === inputVal);
                 const fb = document.getElementById('test-feedback-area');
 
                 if (isCorrect) {
@@ -822,10 +766,7 @@
                     fb.className = "p-4 rounded-xl text-sm font-medium bg-emerald-900/30 border border-emerald-500/50 text-emerald-300";
                     fb.innerHTML = `<strong>Richtig!</strong> Ausgezeichnet.`;
                     fb.classList.remove('hidden');
-                    setTimeout(() => {
-                        this.activeTest.currentIndex++;
-                        this.loadTestQuestion();
-                    }, 1200);
+                    setTimeout(() => { this.activeTest.currentIndex++; this.loadTestQuestion(); }, 1200);
                 } else {
                     audioFX.error();
                     this.activeTest.wrongCount++;
@@ -833,31 +774,56 @@
 
                     if (this.activeTest.hangmanEnabled) {
                         this.activeTest.hangmanErrors++;
-                        this.updateHangmanDisplay();
-                        if (this.activeTest.hangmanErrors >= 6) {
-                            this.failTestByHangman();
-                            return;
-                        }
+                        this.drawHangman(this.activeTest.hangmanErrors);
+                        if (this.activeTest.hangmanErrors >= 6) { this.failTestByHangman(); return; }
                     }
 
                     fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
                     fb.innerHTML = `<strong>Falsch!</strong> Richtige Antwort(en): <strong>${vocab.targetMeanings.join(', ')}</strong>`;
                     fb.classList.remove('hidden');
-                    setTimeout(() => {
-                        this.activeTest.currentIndex++;
-                        this.loadTestQuestion();
-                    }, 3000);
+                    setTimeout(() => { this.activeTest.currentIndex++; this.loadTestQuestion(); }, 3000);
                 }
             }
 
-            updateHangmanDisplay() {
-                document.getElementById('hangman-errors').innerText = this.activeTest.hangmanErrors;
-                const stages = ["[      ]", "[  O   ]", "[  O \n /|   ]", "[  O \n /|\\  ]", "[  O \n /|\\ \n /    ]", "[  O \n /|\\ \n / \\  ]", "GAME OVER"];
-                document.getElementById('hangman-ascii').innerText = stages[this.activeTest.hangmanErrors] || stages[6];
+            drawHangman(errors) {
+                const canvas = document.getElementById('hangman-canvas');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 3;
+
+                // Gallows
+                ctx.beginPath();
+                ctx.moveTo(20, 130); ctx.lineTo(100, 130);
+                ctx.moveTo(40, 130); ctx.lineTo(40, 15);
+                ctx.lineTo(95, 15);
+                ctx.lineTo(95, 35);
+                ctx.stroke();
+
+                // Body parts based on errors (1 to 6)
+                if (errors >= 1) { // Head
+                    ctx.beginPath(); ctx.arc(95, 48, 12, 0, Math.PI * 2); ctx.stroke();
+                }
+                if (errors >= 2) { // Torso
+                    ctx.beginPath(); ctx.moveTo(95, 60); ctx.lineTo(95, 95); ctx.stroke();
+                }
+                if (errors >= 3) { // Left Arm
+                    ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(75, 85); ctx.stroke();
+                }
+                if (errors >= 4) { // Right Arm
+                    ctx.beginPath(); ctx.moveTo(95, 70); ctx.lineTo(115, 85); ctx.stroke();
+                }
+                if (errors >= 5) { // Left Leg
+                    ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(80, 120); ctx.stroke();
+                }
+                if (errors >= 6) { // Right Leg
+                    ctx.beginPath(); ctx.moveTo(95, 95); ctx.lineTo(110, 120); ctx.stroke();
+                }
             }
 
             failTestByHangman() {
-                alert("Hangman komplett! Test nicht bestanden.");
+                alert("Hangman ist komplett! Test nicht bestanden.");
                 this.finishTestSession(true);
             }
 
@@ -889,11 +855,7 @@
                 const canvas = document.getElementById('shooter-canvas');
                 const ctx = canvas.getContext('2d');
 
-                this.shooterGame = {
-                    active: true, score: 0, health: 100,
-                    ship: { x: 400, y: 380, speed: 6 },
-                    lasers: [], enemies: [], particles: [], keys: {}
-                };
+                this.shooterGame = { active: true, score: 0, health: 100, ship: { x: 400, y: 380, speed: 6 }, lasers: [], enemies: [], keys: {} };
 
                 window.onkeydown = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = true; if (e.code === 'Space') { e.preventDefault(); this.fireLaser(); } };
                 window.onkeyup = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = false; };
@@ -905,7 +867,6 @@
                 let enemyTimer = 0;
                 const loop = () => {
                     if (!this.shooterGame || !this.shooterGame.active) return;
-                    // Update
                     const g = this.shooterGame;
                     if (g.keys['ArrowLeft'] || g.keys['KeyA']) g.ship.x -= g.ship.speed;
                     if (g.keys['ArrowRight'] || g.keys['KeyD']) g.ship.x += g.ship.speed;
@@ -937,14 +898,10 @@
                         if (e.y > 450) {
                             g.enemies.splice(ei, 1);
                             g.health -= 15;
-                            if (g.health <= 0) {
-                                alert(`Game Over! Score: ${g.score}`);
-                                this.exitSciFiShooter();
-                            }
+                            if (g.health <= 0) { alert(`Game Over! Score: ${g.score}`); this.exitSciFiShooter(); }
                         }
                     });
 
-                    // Draw
                     ctx.fillStyle = '#030712';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
                     ctx.fillStyle = '#06b6d4';
@@ -954,7 +911,7 @@
                     g.lasers.forEach(l => ctx.fillRect(l.x - 2, l.y, 4, 10));
 
                     ctx.fillStyle = '#f43f5e';
-                    g.enemies.forEach(e => { ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill(); });
+                    g.exports.forEach(e => { ctx.beginPath(); ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2); ctx.fill(); }); // Fixed typo
 
                     requestAnimationFrame(loop);
                 };
