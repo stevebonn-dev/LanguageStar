@@ -33,8 +33,8 @@
                 <span class="text-white font-orbitron font-bold text-xl">★</span>
             </div>
             <div>
-                <h1 class="font-orbitron font-bold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-300 to-purple-400">LANGUAGE STAR+</h1>
-                <p class="text-xs text-gray-400">Cyber Vocabulary Trainer</p>
+                <h1 id="app-title-text" class="font-orbitron font-bold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-cyan-300 to-purple-400">LANGUAGE STAR+</h1>
+                <p id="app-subtitle-text" class="text-xs text-gray-400">Cyber Vocabulary Trainer</p>
             </div>
         </div>
 
@@ -79,7 +79,7 @@
                 <div class="flex items-center space-x-3 w-full md:w-auto">
                     <button onclick="app.openNewChapterModal()" class="flex-1 md:flex-none px-5 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 text-white font-medium shadow-lg neon-glow transition-all flex items-center justify-center space-x-2">
                         <span class="text-lg font-bold">+</span>
-                        <span>Neues Kapitel erstellen</span>
+                        <span id="btn-new-chapter">Neues Kapitel erstellen</span>
                     </button>
                 </div>
             </div>
@@ -102,7 +102,7 @@
             </div>
 
             <div class="glass-panel rounded-2xl p-6 border border-indigo-500/30">
-                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste (Mehrere Bedeutungen separat)</h3>
+                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste (Mehrere Bedeutungen unabhängig testbar)</h3>
                 <div id="vocab-list-container" class="space-y-3"></div>
             </div>
         </div>
@@ -132,7 +132,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Zeitlimit pro Bedeutung</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Zeitlimit pro Vokabel</label>
                         <select id="test-timer" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white">
                             <option value="0">Aus (Unendlich)</option>
                             <option value="5">5 Sekunden</option>
@@ -181,10 +181,10 @@
                 <span id="test-direction-label" class="text-xs font-orbitron tracking-widest text-indigo-400 uppercase">Deutsch &rarr; Zielsprache</span>
                 <div class="py-4">
                     <h3 id="test-prompt-word" class="text-3xl font-bold font-orbitron text-white">Wort</h3>
-                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib eine Bedeutung ein:</p>
+                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib eine beliebige gültige Bedeutung ein:</p>
                 </div>
                 <form id="test-answer-form" onsubmit="app.submitAnswer(event)" class="space-y-4">
-                    <input type="text" id="test-input-answer" autocomplete="off" autofocus placeholder="Übersetzung..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
+                    <input type="text" id="test-input-answer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Übersetzung..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
                     <button type="submit" class="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-medium neon-glow">Antwort prüfen</button>
                 </form>
                 <div id="test-feedback-area" class="hidden p-4 rounded-xl text-sm font-medium"></div>
@@ -194,7 +194,10 @@
         <!-- SCREEN 5: TEST SUMMARY -->
         <div id="screen-test-summary" class="space-y-6 hidden max-w-2xl mx-auto text-center">
             <div class="glass-panel rounded-2xl p-8 border border-indigo-500/40 neon-glow space-y-6">
-                <div id="summary-grade-badge" class="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-cyan-400 border border-indigo-500/40 rounded-3xl flex items-center justify-center mx-auto text-white text-3xl font-orbitron neon-glow">1</div>
+                <div class="flex flex-col items-center justify-center">
+                    <span class="font-orbitron text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Note</span>
+                    <div id="summary-grade-badge" class="w-20 h-20 bg-gradient-to-tr from-indigo-600 to-cyan-400 border border-indigo-500/40 rounded-3xl flex items-center justify-center text-white text-3xl font-orbitron neon-glow">1</div>
+                </div>
                 <div>
                     <h2 class="font-orbitron font-bold text-3xl text-white">Test Auswertung</h2>
                     <p id="summary-subtitle" class="text-sm text-gray-400 mt-1">Großartige Leistung!</p>
@@ -266,7 +269,7 @@
             <form id="form-chapter" onsubmit="app.saveChapter(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Kapitel Name</label>
-                    <input type="text" id="input-chapter-name" required placeholder="z.B. Lektion 1: Grundlagen" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="input-chapter-name" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="z.B. Lektion 1: Grundlagen" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Zielsprache</label>
@@ -293,7 +296,7 @@
             <form onsubmit="app.saveRenamedChapter(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Neuer Kapitel Name</label>
-                    <input type="text" id="input-rename-value" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="input-rename-value" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div class="flex items-center justify-end space-x-3 pt-3">
                     <button type="button" onclick="app.closeModal('modal-rename-chapter')" class="px-4 py-2 rounded-xl bg-slate-800 text-gray-300 text-sm">Abbrechen</button>
@@ -311,7 +314,7 @@
                 <input type="hidden" id="input-vocab-id">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort (Base)</label>
-                    <input type="text" id="input-vocab-base" required placeholder="z.B. Haus" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
+                    <input type="text" id="input-vocab-base" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="z.B. Haus" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 
                 <div>
@@ -335,6 +338,13 @@
         <div class="glass-panel max-w-lg w-full rounded-2xl p-6 border border-indigo-500/40 neon-glow space-y-5">
             <h3 class="font-orbitron font-bold text-xl text-white">⚙️ App-Einstellungen</h3>
             <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-1">App-Sprache / App Language</label>
+                    <select id="settings-app-language" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white">
+                        <option value="de">Deutsch</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Schriftgröße</label>
                     <select id="settings-font-size" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white">
@@ -395,12 +405,13 @@
                     lastSynced: null,
                     gdriveKey: "",
                     fontSize: "text-size-md",
+                    appLanguage: "de",
                     chapters: []
                 };
                 this.currentChapterId = null;
                 this.activeTest = {
                     chapterId: null, direction: 'de-to-target', order: 'sequential', timerLimit: 10,
-                    hangmanEnabled: false, testQueue: [], currentIndex: 0,
+                    hangmanEnabled: false, testQueue: [], currentIndex: 1,
                     correctCount: 0, wrongCount: 0, wrongVocabList: [], currentTimerInterval: null,
                     timeLeft: 0, hangmanErrors: 0
                 };
@@ -419,7 +430,7 @@
                         }
                         this.applySettings();
                         this.showScreen('home');
-                        this.updateSyncStatus("Lokal gespeichert");
+                        this.updateSyncStatus(this.db.appLanguage === 'en' ? "Locally saved" : "Lokal gespeichert");
                     } catch(e) {
                         this.showStartupModal();
                     }
@@ -438,7 +449,7 @@
                     this.initApp();
                 } else {
                     this.db = {
-                        version: "1.0", lastSynced: null, gdriveKey: "", fontSize: "text-size-md",
+                        version: "1.0", lastSynced: null, gdriveKey: "", fontSize: "text-size-md", appLanguage: "de",
                         chapters: [
                             {
                                 id: 'chap_' + Date.now() + '_1',
@@ -459,18 +470,19 @@
 
             persist() {
                 localStorage.setItem('language_star_database', JSON.stringify(this.db));
-                this.updateSyncStatus("Lokal gespeichert");
+                this.updateSyncStatus(this.db.appLanguage === 'en' ? "Locally saved" : "Lokal gespeichert");
             }
 
             updateSyncStatus(text) { document.getElementById('sync-text').innerText = text; }
 
             triggerGoogleDriveSync(isInitial = false) {
-                this.updateSyncStatus("Synchronisiere mit Google Drive...");
+                const isEn = this.db.appLanguage === 'en';
+                this.updateSyncStatus(isEn ? "Syncing with Google Drive..." : "Synchronisiere mit Google Drive...");
                 setTimeout(() => {
                     const cloudBackup = localStorage.getItem('language_star_gdrive_cloud');
                     if (isInitial && !cloudBackup) {
                         this.persist();
-                        this.updateSyncStatus("Cloud leer - Lokal initialisiert");
+                        this.updateSyncStatus(isEn ? "Cloud empty - Local initialized" : "Cloud leer - Lokal initialisiert");
                         this.showScreen('home');
                         return;
                     }
@@ -481,9 +493,9 @@
                         this.persist();
                     }
                     this.db.lastSynced = new Date().toISOString();
-                    this.updateSyncStatus("Google Drive Sync OK");
+                    this.updateSyncStatus(isEn ? "Google Drive Sync OK" : "Google Drive Sync OK");
                     this.showScreen('home');
-                    if (!isInitial) alert("Google Drive Synchronisation erfolgreich!");
+                    if (!isInitial) alert(isEn ? "Google Drive synchronization successful!" : "Google Drive Synchronisation erfolgreich!");
                 }, 800);
             }
 
@@ -500,26 +512,29 @@
                 container.innerHTML = '';
 
                 if (!this.db.chapters || this.db.chapters.length === 0) {
-                    container.innerHTML = `<div class="col-span-2 text-center py-12 text-gray-500 glass-panel rounded-2xl">Keine Kapitel vorhanden. Erstelle jetzt dein erstes Kapitel!</div>`;
+                    const emptyMsg = this.db.appLanguage === 'en' ? "No chapters found. Create your first chapter now!" : "Keine Kapitel vorhanden. Erstelle jetzt dein erstes Kapitel!";
+                    container.innerHTML = `<div class="col-span-2 text-center py-12 text-gray-500 glass-panel rounded-2xl">${emptyMsg}</div>`;
                     return;
                 }
 
                 this.db.chapters.forEach(chap => {
                     const card = document.createElement('div');
                     card.className = "glass-panel rounded-2xl p-6 border border-indigo-500/30 hover:border-indigo-500/60 transition-all flex flex-col justify-between space-y-4";
+                    const openText = this.db.appLanguage === 'en' ? "&rarr; Open & Test" : "&rarr; Öffnen & Testen";
+                    const vocabCountText = this.db.appLanguage === 'en' ? `${chap.vocabularies.length} words` : `${chap.vocabularies.length} Vokabeln`;
                     card.innerHTML = `
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="px-3 py-1 rounded-full bg-indigo-600/25 border border-indigo-500/30 text-indigo-300 text-xs font-orbitron">${chap.targetLanguage}</span>
-                                <span class="text-xs text-gray-400">${chap.vocabularies.length} Vokabeln</span>
+                                <span class="text-xs text-gray-400">${vocabCountText}</span>
                             </div>
                             <h3 class="font-orbitron font-bold text-lg text-white">${chap.title}</h3>
                         </div>
                         <div class="flex items-center justify-between pt-2 border-t border-slate-800">
-                            <button onclick="app.openChapter('${chap.id}')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">&rarr; Öffnen & Testen</button>
+                            <button onclick="app.openChapter('${chap.id}')" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">${openText}</button>
                             <div class="flex items-center space-x-2">
-                                <button onclick="app.currentChapterId='${chap.id}'; app.openRenameChapterModal();" class="p-2 text-gray-400 hover:text-white" title="Umbenennen">✏️</button>
-                                <button onclick="app.deleteChapter('${chap.id}')" class="p-2 text-red-400 hover:text-red-300" title="Löschen">🗑️</button>
+                                <button onclick="app.currentChapterId='${chap.id}'; app.openRenameChapterModal();" class="p-2 text-gray-400 hover:text-white" title="Rename">✏️</button>
+                                <button onclick="app.deleteChapter('${chap.id}')" class="p-2 text-red-400 hover:text-red-300" title="Delete">🗑️</button>
                             </div>
                         </div>
                     `;
@@ -533,25 +548,29 @@
                 if (!chap) return;
 
                 document.getElementById('editor-chapter-title').innerText = chap.title;
-                document.getElementById('editor-chapter-subtitle').innerText = `Zielsprache: ${chap.targetLanguage} • ${chap.vocabularies.length} Vokabeln`;
+                document.getElementById('editor-chapter-subtitle').innerText = `Target: ${chap.targetLanguage} • ${chap.vocabularies.length} ${this.db.appLanguage === 'en' ? 'words' : 'Vokabeln'}`;
                 
                 const listContainer = document.getElementById('vocab-list-container');
                 listContainer.innerHTML = '';
 
                 if (chap.vocabularies.length === 0) {
-                    listContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-6">Noch keine Vokabeln in diesem Kapitel.</p>`;
+                    const noVocab = this.db.appLanguage === 'en' ? "No vocabulary in this chapter yet." : "Noch keine Vokabeln in diesem Kapitel.";
+                    listContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-6">${noVocab}</p>`;
                 } else {
                     chap.vocabularies.forEach(vocab => {
                         const item = document.createElement('div');
                         item.className = "p-4 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between";
+                        const editTxt = this.db.appLanguage === 'en' ? 'Edit' : 'Bearbeiten';
+                        const delTxt = this.db.appLanguage === 'en' ? 'Delete' : 'Löschen';
+                        const meanTxt = this.db.appLanguage === 'en' ? 'Meanings' : 'Bedeutungen';
                         item.innerHTML = `
                             <div>
                                 <span class="font-bold text-white">${vocab.baseWord}</span>
-                                <span class="text-xs text-gray-400 block mt-0.5">Bedeutungen: ${vocab.targetMeanings.join(', ')}</span>
+                                <span class="text-xs text-gray-400 block mt-0.5">${meanTxt}: ${vocab.targetMeanings.join(', ')}</span>
                             </div>
                             <div class="flex items-center space-x-2">
-                                <button onclick="app.openEditVocabModal('${vocab.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-gray-300">Bearbeiten</button>
-                                <button onclick="app.deleteVocab('${vocab.id}')" class="px-3 py-1 rounded-lg bg-red-900/30 hover:bg-red-900/50 text-xs text-red-300">Löschen</button>
+                                <button onclick="app.openEditVocabModal('${vocab.id}')" class="px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs text-gray-300">${editTxt}</button>
+                                <button onclick="app.deleteVocab('${vocab.id}')" class="px-3 py-1 rounded-lg bg-red-900/30 hover:bg-red-900/50 text-xs text-red-300">${delTxt}</button>
                             </div>
                         `;
                         listContainer.appendChild(item);
@@ -562,7 +581,7 @@
 
             openNewChapterModal() {
                 this.currentChapterId = null;
-                document.getElementById('modal-chapter-title').innerText = "Neues Kapitel erstellen";
+                document.getElementById('modal-chapter-title').innerText = this.db.appLanguage === 'en' ? "Create New Chapter" : "Neues Kapitel erstellen";
                 document.getElementById('form-chapter').reset();
                 document.getElementById('modal-chapter').classList.remove('hidden');
             }
@@ -606,7 +625,8 @@
             }
 
             deleteChapter(chapterId) {
-                if (confirm("Möchtest du dieses Kapitel wirklich löschen?")) {
+                const msg = this.db.appLanguage === 'en' ? "Do you really want to delete this chapter?" : "Möchtest du dieses Kapitel wirklich löschen?";
+                if (confirm(msg)) {
                     this.db.chapters = this.db.chapters.filter(c => c.id !== chapterId);
                     this.persist();
                     this.renderChapters();
@@ -614,7 +634,7 @@
             }
 
             openAddVocabModal() {
-                document.getElementById('modal-vocab-title').innerText = "Vokabel hinzufügen";
+                document.getElementById('modal-vocab-title').innerText = this.db.appLanguage === 'en' ? "Add Vocabulary" : "Vokabel hinzufügen";
                 document.getElementById('form-vocab').reset();
                 document.getElementById('input-vocab-id').value = '';
                 document.getElementById('meanings-container').innerHTML = '';
@@ -627,7 +647,7 @@
                 const vocab = chap.vocabularies.find(v => v.id === vocabId);
                 if (!vocab) return;
 
-                document.getElementById('modal-vocab-title').innerText = "Vokabel bearbeiten";
+                document.getElementById('modal-vocab-title').innerText = this.db.appLanguage === 'en' ? "Edit Vocabulary" : "Vokabel bearbeiten";
                 document.getElementById('input-vocab-id').value = vocab.id;
                 document.getElementById('input-vocab-base').value = vocab.baseWord;
                 
@@ -642,8 +662,9 @@
                 const container = document.getElementById('meanings-container');
                 const div = document.createElement('div');
                 div.className = "flex items-center space-x-2";
+                const ph = this.db.appLanguage === 'en' ? 'e.g. house' : 'z.B. house';
                 div.innerHTML = `
-                    <input type="text" value="${value}" placeholder="z.B. house" required class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 meaning-input">
+                    <input type="text" value="${value}" placeholder="${ph}" required autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500 meaning-input">
                     <button type="button" onclick="this.parentElement.remove()" class="p-2 bg-red-900/30 hover:bg-red-900/50 text-red-300 rounded-xl text-xs">✕</button>
                 `;
                 container.appendChild(div);
@@ -662,7 +683,7 @@
                 });
 
                 if (targetMeanings.length === 0) {
-                    alert("Bitte gib mindestens eine Bedeutung an.");
+                    alert(this.db.appLanguage === 'en' ? "Please provide at least one meaning." : "Bitte gib mindestens eine Bedeutung an.");
                     return;
                 }
 
@@ -688,25 +709,38 @@
             }
 
             closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+            
             openSettingsModal() {
+                document.getElementById('settings-app-language').value = this.db.appLanguage || 'de';
                 document.getElementById('settings-font-size').value = this.db.fontSize || 'text-size-md';
                 document.getElementById('settings-gdrive-key').value = this.db.gdriveKey || '';
                 document.getElementById('modal-settings').classList.remove('hidden');
             }
+
             applySettings() {
                 document.getElementById('body-root').className = `min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white ${this.db.fontSize || 'text-size-md'}`;
+                const isEn = this.db.appLanguage === 'en';
+                document.getElementById('app-title-text').innerText = "LANGUAGE STAR+";
+                document.getElementById('app-subtitle-text').innerText = isEn ? "Cyber Vocabulary Trainer" : "Cyber Vokabeltrainer";
             }
+
             saveSettings() {
+                this.db.appLanguage = document.getElementById('settings-app-language').value;
                 this.db.fontSize = document.getElementById('settings-font-size').value;
                 this.db.gdriveKey = document.getElementById('settings-gdrive-key').value;
                 this.persist();
+                this.applySettings();
                 this.closeModal('modal-settings');
-                alert("Einstellungen gespeichert!");
+                alert(this.db.appLanguage === 'en' ? "Settings saved!" : "Einstellungen gespeichert!");
+                this.renderChapters();
             }
 
             startTestSetup() {
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
-                if (!chap || chap.vocabularies.length === 0) { alert("Dieses Kapitel enthält keine Vokabeln!"); return; }
+                if (!chap || chap.vocabularies.length === 0) {
+                    alert(this.db.appLanguage === 'en' ? "This chapter contains no vocabulary!" : "Dieses Kapitel enthält keine Vokabeln!");
+                    return;
+                }
                 this.showScreen('test-setup');
             }
 
@@ -720,19 +754,13 @@
                 let vocabsToTest = subsetVocabs ? [...subsetVocabs] : [...chap.vocabularies];
                 if (order === 'shuffle') vocabsToTest.sort(() => Math.random() - 0.5);
 
-                // Build a flattened test queue where every single meaning of each vocabulary gets its own prompt step
-                let testQueue = [];
-                vocabsToTest.forEach(vocab => {
-                    vocab.targetMeanings.forEach((meaning, mIndex) => {
-                        testQueue.push({
-                            vocabId: vocab.id,
-                            baseWord: vocab.baseWord,
-                            targetMeanings: vocab.targetMeanings,
-                            targetMeaningIndex: mIndex,
-                            expectedMeaning: meaning
-                        });
-                    });
-                });
+                // Build test queue: each vocabulary item is tested independently. 
+                // Any of its multiple valid meanings can be entered to pass.
+                let testQueue = vocabsToTest.map(vocab => ({
+                    vocabId: vocab.id,
+                    baseWord: vocab.baseWord,
+                    targetMeanings: vocab.targetMeanings
+                }));
 
                 if (order === 'shuffle') testQueue.sort(() => Math.random() - 0.5);
 
@@ -773,8 +801,13 @@
                 let chap = this.db.chapters.find(c => c.id === this.currentChapterId);
                 let dir = this.activeTest.direction === 'mixed' ? (Math.random() > 0.5 ? 'de-to-target' : 'target-to-de') : this.activeTest.direction;
 
-                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? item.baseWord : item.expectedMeaning;
-                document.getElementById('test-sub-prompt').innerText = (dir === 'de-to-target') ? `Übersetze ins ${chap.targetLanguage} (Bedeutung ${item.targetMeaningIndex + 1} von ${item.targetMeanings.length})` : `Übersetze ins Deutsche`;
+                // When testing target-to-de, pick one representative meaning to prompt
+                if (dir === 'target-to-de' && !item.selectedPromptMeaning) {
+                    item.selectedPromptMeaning = item.targetMeanings[Math.floor(Math.random() * item.targetMeanings.length)];
+                }
+
+                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? item.baseWord : item.selectedPromptMeaning;
+                document.getElementById('test-sub-prompt').innerText = (dir === 'de-to-target') ? `Übersetze ins ${chap.targetLanguage} (Mehrere Bedeutungen möglich)` : `Übersetze ins Deutsche`;
                 document.getElementById('test-direction-label').innerText = (dir === 'de-to-target') ? `Deutsch &rarr; ${chap.targetLanguage}` : `${chap.targetLanguage} &rarr; Deutsch`;
 
                 document.getElementById('test-input-answer').value = '';
@@ -819,7 +852,7 @@
 
                 const fb = document.getElementById('test-feedback-area');
                 fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Korrekte Bedeutung: <strong>${item.expectedMeaning}</strong>`;
+                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Gültige Bedeutungen: <strong>${item.targetMeanings.join(', ')}</strong>`;
                 fb.classList.remove('hidden');
 
                 setTimeout(() => {
@@ -832,13 +865,17 @@
                 event.preventDefault();
                 if (this.activeTest.currentTimerInterval) clearInterval(this.activeTest.currentTimerInterval);
 
-                const inputVal = document.getElementById('test-input-answer').value.trim();
+                const inputVal = document.getElementById('test-input-answer').value.trim().toLowerCase();
                 const item = this.activeTest.testQueue[this.activeTest.currentIndex];
                 const dir = this.activeTest.direction === 'mixed' ? 'de-to-target' : this.activeTest.direction;
 
-                const isCorrect = (dir === 'de-to-target') 
-                    ? (inputVal.toLowerCase() === item.expectedMeaning.trim().toLowerCase())
-                    : (inputVal.toLowerCase() === item.baseWord.trim().toLowerCase());
+                let isCorrect = false;
+                if (dir === 'de-to-target') {
+                    // Accept input if it matches ANY of the recorded valid target meanings (regardless of sequence)
+                    isCorrect = item.targetMeanings.some(m => m.trim().toLowerCase() === inputVal);
+                } else {
+                    isCorrect = (inputVal === item.baseWord.trim().toLowerCase());
+                }
                 
                 const fb = document.getElementById('test-feedback-area');
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
@@ -869,7 +906,7 @@
                     }
 
                     fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                    fb.innerHTML = `<strong>Falsch!</strong> Gesuchte Bedeutung war: <strong>${item.expectedMeaning}</strong> (Alle: ${item.targetMeanings.join(', ')})`;
+                    fb.innerHTML = `<strong>Falsch!</strong> Gültige Bedeutungen waren: <strong>${item.targetMeanings.join(', ')}</strong>`;
                     fb.classList.remove('hidden');
                     setTimeout(() => {
                         this.activeTest.currentIndex++;
