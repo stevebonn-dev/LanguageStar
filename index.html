@@ -240,10 +240,16 @@
         <!-- SCREEN 6: SCI-FI SHOOTER -->
         <div id="screen-shooter" class="space-y-4 hidden max-w-3xl mx-auto">
             <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border border-cyan-500/40 neon-glow-cyan">
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center space-x-4">
                     <span class="font-orbitron font-bold text-cyan-400 text-sm">★ DEFENDER</span>
                     <span class="text-xs text-gray-300">Score: <span id="shooter-score" class="text-white font-bold">0</span></span>
-                    <span class="text-xs text-gray-300">Schild: <span id="shooter-health" class="text-emerald-400 font-bold">100%</span></span>
+                    <div class="flex items-center space-x-2 bg-slate-900/80 px-3 py-1 rounded-xl border border-cyan-500/40">
+                        <span class="text-xs text-cyan-300 font-bold">Schild:</span>
+                        <div class="w-24 bg-slate-800 h-3 rounded-full overflow-hidden border border-cyan-500/30">
+                            <div id="shooter-health-bar" class="bg-emerald-400 h-full w-full transition-all duration-300"></div>
+                        </div>
+                        <span id="shooter-health" class="text-xs text-emerald-400 font-bold w-9 text-right">100%</span>
+                    </div>
                     <span class="text-xs text-gray-300">Leben: <span id="shooter-lives" class="text-cyan-300 font-bold">2</span></span>
                 </div>
                 <button onclick="app.exitSciFiShooter()" class="px-4 py-1.5 rounded-xl bg-red-600/30 border border-red-500/50 text-red-300 text-xs hover:bg-red-600/50">Beenden</button>
@@ -312,11 +318,11 @@
         </div>
     </div>
 
-    <!-- VOCAB MODAL WITH SEPARATE MEANINGS -->
+    <!-- VOCAB MODAL WITH SEPARATE MEANINGS & CONTINUOUS ENTRY -->
     <div id="modal-vocab" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
         <div class="glass-panel max-w-md w-full rounded-2xl p-6 border border-indigo-500/40 neon-glow space-y-4 max-h-[90vh] overflow-y-auto">
             <h3 id="modal-vocab-title" class="font-orbitron font-bold text-xl text-white">Vokabel hinzufügen</h3>
-            <form id="form-vocab" onsubmit="app.saveVocab(event)" class="space-y-4">
+            <form id="form-vocab" onsubmit="app.saveAndNextVocab(event)" class="space-y-4">
                 <input type="hidden" id="input-vocab-id">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-1">Deutsches Wort (Base)</label>
@@ -325,15 +331,15 @@
                 
                 <div>
                     <div class="flex items-center justify-between mb-1">
-                        <label class="block text-sm font-medium text-gray-300">Bedeutungen in Zielsprache (Separate Felder oder Komma-getrennt)</label>
+                        <label class="block text-sm font-medium text-gray-300">Bedeutungen in Zielsprache</label>
                         <button type="button" onclick="app.addMeaningField()" class="text-xs text-indigo-400 hover:text-indigo-300 font-medium">+ Weitere Bedeutung</button>
                     </div>
                     <div id="meanings-container" class="space-y-2"></div>
                 </div>
 
-                <div class="flex items-center justify-end space-x-3 pt-3">
-                    <button type="button" onclick="app.closeModal('modal-vocab')" class="px-4 py-2 rounded-xl bg-slate-800 text-gray-300 text-sm">Abbrechen</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Speichern</button>
+                <div class="flex items-center justify-between pt-3 border-t border-slate-800">
+                    <button type="button" onclick="app.finishVocabEntry()" class="px-4 py-2 rounded-xl bg-slate-800 text-gray-300 text-sm hover:bg-slate-700">Fertig (Zurück zur Liste)</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium neon-glow">Speichern & Nächste</button>
                 </div>
             </form>
         </div>
@@ -684,6 +690,7 @@
                 document.getElementById('meanings-container').innerHTML = '';
                 this.addMeaningField();
                 document.getElementById('modal-vocab').classList.remove('hidden');
+                setTimeout(() => document.getElementById('input-vocab-base').focus(), 100);
             }
 
             openEditVocabModal(vocabId) {
@@ -702,6 +709,7 @@
                 vocab.targetMeanings.forEach(m => this.addMeaningField(m));
 
                 document.getElementById('modal-vocab').classList.remove('hidden');
+                setTimeout(() => document.getElementById('input-vocab-base').focus(), 100);
             }
 
             addMeaningField(value = '') {
@@ -717,7 +725,7 @@
                 container.appendChild(div);
             }
 
-            saveVocab(event) {
+            saveAndNextVocab(event) {
                 event.preventDefault();
                 const vocabId = document.getElementById('input-vocab-id').value;
                 const baseWord = document.getElementById('input-vocab-base').value.trim();
@@ -748,11 +756,22 @@
                 if (vocabId) {
                     const vocab = chap.vocabularies.find(v => v.id === vocabId);
                     if (vocab) { vocab.baseWord = baseWord; vocab.targetMeanings = targetMeanings; }
+                    this.persist();
+                    this.closeModal('modal-vocab');
+                    this.openChapter(this.currentChapterId);
                 } else {
                     chap.vocabularies.push({ id: 'v_' + Date.now(), baseWord, targetMeanings });
+                    this.persist();
+                    // Reset fields for continuous entry and refocus cursor
+                    document.getElementById('form-vocab').reset();
+                    document.getElementById('input-vocab-id').value = '';
+                    document.getElementById('meanings-container').innerHTML = '';
+                    this.addMeaningField();
+                    document.getElementById('input-vocab-base').focus();
                 }
+            }
 
-                this.persist();
+            finishVocabEntry() {
                 this.closeModal('modal-vocab');
                 this.openChapter(this.currentChapterId);
             }
@@ -878,8 +897,10 @@
 
                 document.getElementById('test-direction-label').innerText = (dir === 'de-to-target') ? `Deutsch &rarr; ${chap.targetLanguage}` : `${chap.targetLanguage} &rarr; Deutsch`;
 
-                document.getElementById('test-input-answer').value = '';
+                const inputEl = document.getElementById('test-input-answer');
+                inputEl.value = '';
                 document.getElementById('test-feedback-area').classList.add('hidden');
+                setTimeout(() => inputEl.focus(), 50);
 
                 if (this.activeTest.timerLimit > 0) this.startTimer();
             }
@@ -1057,7 +1078,9 @@
 
                 document.getElementById('summary-subtitle').innerText = subTitleText;
 
-                document.getElementById('shooter-unlock-box').classList.toggle('hidden', !(accuracy >= 90 && !failedByHangman && total > 0));
+                // Unlock arcade mode only if score >= 90% AND at least 10 full questions completed
+                const canUnlockShooter = (accuracy >= 90 && !failedByHangman && total >= 10);
+                document.getElementById('shooter-unlock-box').classList.toggle('hidden', !canUnlockShooter);
                 document.getElementById('btn-retry-mistakes').classList.toggle('hidden', this.activeTest.wrongVocabList.length === 0);
             }
 
@@ -1078,6 +1101,7 @@
                 };
 
                 document.getElementById('shooter-health').innerText = '100%';
+                document.getElementById('shooter-health-bar').style.width = '100%';
                 document.getElementById('shooter-lives').innerText = '2';
                 document.getElementById('shooter-score').innerText = '0';
 
@@ -1130,24 +1154,37 @@
                     if (enemyTimer > 55) {
                         enemyTimer = 0;
                         const isDrone = Math.random() > 0.4;
+                        // Generate jagged meteor vertices if asteroid
+                        let vertices = [];
+                        let size = Math.random() * 8 + 16;
+                        if (!isDrone) {
+                            for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+                                let r = size * (0.7 + Math.random() * 0.5);
+                                vertices.push({ x: Math.cos(a) * r, y: Math.sin(a) * r });
+                            }
+                        }
+
                         g.enemies.push({
                             x: Math.random() * (canvas.width - 60) + 30,
                             y: -25,
                             speed: Math.random() * 1.5 + 1.2,
-                            size: Math.random() * 8 + 14,
+                            size: size,
                             type: isDrone ? 'drone' : 'asteroid',
+                            vertices: vertices,
+                            rotation: Math.random() * Math.PI,
+                            rotSpeed: (Math.random() - 0.5) * 0.03,
                             lastShot: 0
                         });
                     }
 
                     g.enemies.forEach(e => {
                         e.y += e.speed;
-                        // Drones periodically shoot at the player
+                        e.rotation += e.rotSpeed;
                         if (e.type === 'drone') {
                             e.lastShot++;
                             if (e.lastShot > 75) {
                                 e.lastShot = 0;
-                                g.enemyLasers.push({ x: e.x, y: e.y + 10 });
+                                g.enemyLasers.push({ x: e.x, y: e.y + 12 });
                             }
                         }
                     });
@@ -1155,7 +1192,7 @@
                     // Check player laser hits on enemies
                     g.lasers.forEach((l, li) => {
                         g.enemies.forEach((e, ei) => {
-                            if (Math.hypot(l.x - e.x, l.y - e.y) < e.size + 8) {
+                            if (Math.hypot(l.x - e.x, l.y - e.y) < e.size + 6) {
                                 audioFX.explosion();
                                 g.score += e.type === 'drone' ? 200 : 100;
                                 document.getElementById('shooter-score').innerText = g.score;
@@ -1176,7 +1213,9 @@
                             audioFX.error();
                             g.enemyLasers.splice(eli, 1);
                             g.health -= 25;
-                            document.getElementById('shooter-health').innerText = `${Math.max(0, g.health)}%`;
+                            const healthPct = Math.max(0, g.health);
+                            document.getElementById('shooter-health').innerText = `${healthPct}%`;
+                            document.getElementById('shooter-health-bar').style.width = `${healthPct}%`;
                             
                             if (g.health <= 0) {
                                 g.lives--;
@@ -1187,6 +1226,7 @@
                                 } else {
                                     g.health = 100;
                                     document.getElementById('shooter-health').innerText = '100%';
+                                    document.getElementById('shooter-health-bar').style.width = '100%';
                                     alert('Schild zerstört! Leben verloren. Nächstes Leben aktiv!');
                                 }
                             }
@@ -1243,21 +1283,46 @@
                     ctx.shadowBlur = 8;
                     g.enemyLasers.forEach(el => ctx.fillRect(el.x - 2, el.y, 4, 12));
 
-                    // Draw Enemies
+                    // Draw Enemies (Realistic Starfighter or Jagged Meteor)
                     g.enemies.forEach(e => {
                         ctx.save();
                         ctx.translate(e.x, e.y);
+                        ctx.rotate(e.rotation);
                         if (e.type === 'drone') {
+                            // Render actual enemy starfighter spaceship
                             ctx.fillStyle = '#f43f5e';
                             ctx.shadowColor = '#f43f5e';
                             ctx.shadowBlur = 12;
-                            ctx.beginPath(); ctx.arc(0, 0, e.size, 0, Math.PI * 2); ctx.fill();
+                            ctx.beginPath();
+                            ctx.moveTo(0, 16);
+                            ctx.lineTo(14, -10);
+                            ctx.lineTo(5, -6);
+                            ctx.lineTo(0, -16);
+                            ctx.lineTo(-5, -6);
+                            ctx.lineTo(-14, -10);
+                            ctx.closePath();
+                            ctx.fill();
+
+                            // Cockpit glow
+                            ctx.fillStyle = '#38bdf8';
+                            ctx.beginPath();
+                            ctx.arc(0, -2, 3, 0, Math.PI * 2);
+                            ctx.fill();
                         } else {
+                            // Render jagged meteor/asteroid shape
                             ctx.fillStyle = '#64748b';
-                            ctx.shadowColor = '#64748b';
+                            ctx.shadowColor = '#475569';
                             ctx.shadowBlur = 6;
                             ctx.beginPath();
-                            ctx.arc(0, 0, e.size, 0, Math.PI * 2);
+                            if (e.vertices && e.vertices.length > 0) {
+                                ctx.moveTo(e.vertices[0].x, e.vertices[0].y);
+                                for (let v = 1; v < e.vertices.length; v++) {
+                                    ctx.lineTo(e.vertices[v].x, e.vertices[v].y);
+                                }
+                            } else {
+                                ctx.arc(0, 0, e.size, 0, Math.PI * 2);
+                            }
+                            ctx.closePath();
                             ctx.fill();
                         }
                         ctx.restore();
