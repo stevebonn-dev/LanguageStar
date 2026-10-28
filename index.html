@@ -167,7 +167,7 @@
                 </div>
                 <div class="flex items-center space-x-3">
                     <div id="test-score-counter" class="text-xs font-medium text-emerald-400">Richtig: 0 | Falsch: 0</div>
-                    <button onclick="app.quitActiveTest()" class="px-3 py-1 rounded-lg bg-red-900/40 hover:bg-red-900/70 text-red-300 border border-red-500/40 text-xs font-semibold transition-all">
+                    <button onclick="app.quitActiveTest()" class="px-3 py-1.5 rounded-xl bg-red-900/40 hover:bg-red-900/70 text-red-300 border border-red-500/40 text-xs font-semibold transition-all shadow">
                         ⏹ Test abbrechen
                     </button>
                 </div>
@@ -187,6 +187,7 @@
                 <div class="py-4">
                     <h3 id="test-prompt-word" class="text-3xl font-bold font-orbitron text-white">Wort</h3>
                     <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib eine Bedeutung ein:</p>
+                    <div id="test-given-meanings" class="mt-3 flex flex-wrap justify-center gap-2"></div>
                 </div>
                 <form id="test-answer-form" onsubmit="app.submitAnswer(event)" class="space-y-4">
                     <input type="text" id="test-input-answer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Übersetzung..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
@@ -260,11 +261,12 @@
                 
                 <div class="w-full bg-slate-950/95 p-4 border-t border-cyan-500/40 flex justify-between items-center">
                     <div class="flex space-x-3">
-                        <button id="touch-left" class="w-16 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-2xl active:bg-cyan-600 active:text-white shadow-lg">&larr;</button>
-                        <button id="touch-right" class="w-16 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-2xl active:bg-cyan-600 active:text-white shadow-lg">&rarr;</button>
+                        <button id="touch-left" class="w-14 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-xl active:bg-cyan-600 active:text-white shadow-lg">&larr;</button>
+                        <button id="touch-right" class="w-14 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-xl active:bg-cyan-600 active:text-white shadow-lg">&rarr;</button>
+                        <button id="touch-up" class="w-14 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-xl active:bg-cyan-600 active:text-white shadow-lg">&uarr;</button>
+                        <button id="touch-down" class="w-14 h-14 bg-slate-900 border border-cyan-500/60 text-cyan-300 rounded-2xl font-bold text-xl active:bg-cyan-600 active:text-white shadow-lg">&darr;</button>
                     </div>
-                    <div class="text-xs font-orbitron text-cyan-400 tracking-wider hidden sm:block">TACTICAL COMBAT DECK</div>
-                    <button id="touch-fire" class="w-32 h-14 bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border border-cyan-300 text-white rounded-2xl font-orbitron font-bold text-base neon-glow-cyan active:scale-95 transition-all shadow-xl flex items-center justify-center space-x-1.5">
+                    <button id="touch-fire" class="w-28 h-14 bg-gradient-to-r from-cyan-500 via-indigo-600 to-purple-600 border border-cyan-300 text-white rounded-2xl font-orbitron font-bold text-base neon-glow-cyan active:scale-95 transition-all shadow-xl flex items-center justify-center space-x-1">
                         <span>FIRE</span>
                         <span>💥</span>
                     </button>
@@ -425,7 +427,8 @@
                     chapterId: null, direction: 'de-to-target', order: 'sequential', timerLimit: 10,
                     hangmanEnabled: false, testQueue: [], currentIndex: 0,
                     correctCount: 0, wrongCount: 0, wrongVocabList: [], currentTimerInterval: null,
-                    timeLeft: 0, hangmanErrors: 0
+                    timeLeft: 0, hangmanErrors: 0,
+                    currentVocab: null, remainingMeanings: [], solvedMeanings: []
                 };
                 this.shooterGame = null;
                 this.initApp();
@@ -762,7 +765,6 @@
                 } else {
                     chap.vocabularies.push({ id: 'v_' + Date.now(), baseWord, targetMeanings });
                     this.persist();
-                    // Reset fields for continuous entry and refocus cursor
                     document.getElementById('form-vocab').reset();
                     document.getElementById('input-vocab-id').value = '';
                     document.getElementById('meanings-container').innerHTML = '';
@@ -833,24 +835,19 @@
                 let testQueue = [];
                 vocabsToTest.forEach(vocab => {
                     if (!vocab.targetMeanings) vocab.targetMeanings = [];
-                    vocab.targetMeanings.forEach((meaning, mIndex) => {
-                        testQueue.push({
-                            vocabId: vocab.id,
-                            baseWord: vocab.baseWord,
-                            targetMeanings: vocab.targetMeanings,
-                            targetMeaningIndex: mIndex,
-                            expectedMeaning: meaning
-                        });
+                    testQueue.push({
+                        vocabId: vocab.id,
+                        baseWord: vocab.baseWord,
+                        targetMeanings: [...vocab.targetMeanings]
                     });
                 });
-
-                if (order === 'shuffle') testQueue.sort(() => Math.random() - 0.5);
 
                 this.activeTest = {
                     chapterId: this.currentChapterId, direction, order, timerLimit, hangmanEnabled,
                     testQueue: testQueue, currentIndex: 0,
                     correctCount: 0, wrongCount: 0, wrongVocabList: [], currentTimerInterval: null,
-                    timeLeft: timerLimit, hangmanErrors: 0
+                    timeLeft: timerLimit, hangmanErrors: 0,
+                    currentVocab: null, remainingMeanings: [], solvedMeanings: []
                 };
 
                 if (hangmanEnabled) {
@@ -875,6 +872,10 @@
                 }
 
                 const item = this.activeTest.testQueue[this.activeTest.currentIndex];
+                this.activeTest.currentVocab = item;
+                this.activeTest.remainingMeanings = [...item.targetMeanings];
+                this.activeTest.solvedMeanings = [];
+
                 const total = this.activeTest.testQueue.length;
                 const isEn = this.db.appLanguage === 'en';
                 
@@ -884,18 +885,22 @@
                 let chap = this.db.chapters.find(c => c.id === this.currentChapterId);
                 let dir = this.activeTest.direction === 'mixed' ? (Math.random() > 0.5 ? 'de-to-target' : 'target-to-de') : this.activeTest.direction;
 
-                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? item.baseWord : item.expectedMeaning;
+                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? item.baseWord : item.targetMeanings[0];
                 
                 if (dir === 'de-to-target') {
                     const subText = isEn 
-                        ? `Translate to ${chap.targetLanguage} (Meaning ${item.targetMeaningIndex + 1} of ${item.targetMeanings.length}) — enter any valid translation`
-                        : `Übersetze ins ${chap.targetLanguage} (Bedeutung ${item.targetMeaningIndex + 1} von ${item.targetMeanings.length}) — beliebige gültige Übersetzung möglich`;
+                        ? `Translate to ${chap.targetLanguage} (Enter all ${item.targetMeanings.length} meanings, one by one)`
+                        : `Übersetze ins ${chap.targetLanguage} (Gib alle ${item.targetMeanings.length} Bedeutungen nacheinander ein)`;
                     document.getElementById('test-sub-prompt').innerText = subText;
                 } else {
                     document.getElementById('test-sub-prompt').innerText = isEn ? `Translate to German` : `Übersetze ins Deutsche`;
                 }
 
                 document.getElementById('test-direction-label').innerText = (dir === 'de-to-target') ? `Deutsch &rarr; ${chap.targetLanguage}` : `${chap.targetLanguage} &rarr; Deutsch`;
+
+                // Render solved badge container
+                const givenContainer = document.getElementById('test-given-meanings');
+                givenContainer.innerHTML = '';
 
                 const inputEl = document.getElementById('test-input-answer');
                 inputEl.value = '';
@@ -923,7 +928,7 @@
 
             handleTimeOut() {
                 audioFX.error();
-                const item = this.activeTest.testQueue[this.activeTest.currentIndex];
+                const item = this.activeTest.currentVocab;
                 this.activeTest.wrongCount++;
                 
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
@@ -941,13 +946,13 @@
 
                 const fb = document.getElementById('test-feedback-area');
                 fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Gültige Bedeutungen: <strong>${item.targetMeanings.join(', ')}</strong>`;
+                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Alle gültigen Bedeutungen: <strong>${item.targetMeanings.join(', ')}</strong>`;
                 fb.classList.remove('hidden');
 
                 setTimeout(() => {
                     this.activeTest.currentIndex++;
                     this.loadTestQuestion();
-                }, 2500);
+                }, 3000);
             }
 
             submitAnswer(event) {
@@ -956,30 +961,51 @@
 
                 const rawInput = document.getElementById('test-input-answer').value;
                 const inputClean = this.cleanWord(rawInput);
-                const item = this.activeTest.testQueue[this.activeTest.currentIndex];
+                const item = this.activeTest.currentVocab;
                 const dir = this.activeTest.direction === 'mixed' ? 'de-to-target' : this.activeTest.direction;
-
-                let isCorrect = false;
-                if (dir === 'de-to-target') {
-                    isCorrect = item.targetMeanings.some(m => this.cleanWord(m) === inputClean);
-                } else {
-                    isCorrect = (inputClean === this.cleanWord(item.baseWord));
-                }
-                
                 const fb = document.getElementById('test-feedback-area');
                 const chap = this.db.chapters.find(c => c.id === this.currentChapterId);
                 const fullVocab = chap.vocabularies.find(v => v.id === item.vocabId);
 
-                if (isCorrect) {
+                let isMatchIndex = -1;
+                if (dir === 'de-to-target') {
+                    isMatchIndex = this.activeTest.remainingMeanings.findIndex(m => this.cleanWord(m) === inputClean);
+                } else {
+                    isMatchIndex = (inputClean === this.cleanWord(item.baseWord)) ? 0 : -1;
+                }
+
+                if (isMatchIndex !== -1) {
                     audioFX.success();
+                    const matchedMeaning = this.activeTest.remainingMeanings.splice(isMatchIndex, 1)[0];
+                    this.activeTest.solvedMeanings.push(matchedMeaning);
                     this.activeTest.correctCount++;
-                    fb.className = "p-4 rounded-xl text-sm font-medium bg-emerald-900/30 border border-emerald-500/50 text-emerald-300";
-                    fb.innerHTML = `<strong>Richtig!</strong> Ausgezeichnet.`;
-                    fb.classList.remove('hidden');
-                    setTimeout(() => {
-                        this.activeTest.currentIndex++;
-                        this.loadTestQuestion();
-                    }, 1200);
+
+                    // Render solved tag badge
+                    const givenContainer = document.getElementById('test-given-meanings');
+                    const badge = document.createElement('span');
+                    badge.className = "px-3 py-1 bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 rounded-lg text-xs font-semibold";
+                    badge.innerText = `✓ ${matchedMeaning}`;
+                    givenContainer.appendChild(badge);
+
+                    document.getElementById('test-input-answer').value = '';
+
+                    // Check if all meanings for this word are solved
+                    if (this.activeTest.remainingMeanings.length === 0) {
+                        fb.className = "p-4 rounded-xl text-sm font-medium bg-emerald-900/30 border border-emerald-500/50 text-emerald-300";
+                        fb.innerHTML = `<strong>Alle Bedeutungen korrekt!</strong> Nächste Frage...`;
+                        fb.classList.remove('hidden');
+                        setTimeout(() => {
+                            this.activeTest.currentIndex++;
+                            this.loadTestQuestion();
+                        }, 1200);
+                    } else {
+                        // More meanings required
+                        fb.className = "p-4 rounded-xl text-sm font-medium bg-indigo-900/30 border border-indigo-500/50 text-indigo-300";
+                        fb.innerHTML = `Richtig! Es fehlt noch <strong>${this.activeTest.remainingMeanings.length}</strong> weitere Bedeutung(en).`;
+                        fb.classList.remove('hidden');
+                        if (this.activeTest.timerLimit > 0) this.startTimer();
+                        setTimeout(() => fb.classList.add('hidden'), 2000);
+                    }
                 } else {
                     audioFX.error();
                     this.activeTest.wrongCount++;
@@ -995,7 +1021,7 @@
                     }
 
                     fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                    fb.innerHTML = `<strong>Falsch!</strong> Gültige Bedeutungen waren: <strong>${item.targetMeanings.join(', ')}</strong>`;
+                    fb.innerHTML = `<strong>Falsch oder bereits genannt!</strong> Alle gültigen Bedeutungen: <strong>${item.targetMeanings.join(', ')}</strong>`;
                     fb.classList.remove('hidden');
                     setTimeout(() => {
                         this.activeTest.currentIndex++;
@@ -1078,7 +1104,6 @@
 
                 document.getElementById('summary-subtitle').innerText = subTitleText;
 
-                // Unlock arcade mode only if score >= 90% AND at least 10 full questions completed
                 const canUnlockShooter = (accuracy >= 90 && !failedByHangman && total >= 10);
                 document.getElementById('shooter-unlock-box').classList.toggle('hidden', !canUnlockShooter);
                 document.getElementById('btn-retry-mistakes').classList.toggle('hidden', this.activeTest.wrongVocabList.length === 0);
@@ -1097,7 +1122,7 @@
                     active: true, score: 0, health: 100, lives: 2,
                     ship: { x: 350, y: 320, speed: 7 },
                     lasers: [], enemyLasers: [], enemies: [], particles: [],
-                    keys: {}, touchState: { left: false, right: false }
+                    keys: {}, touchState: { left: false, right: false, up: false, down: false }
                 };
 
                 document.getElementById('shooter-health').innerText = '100%';
@@ -1112,6 +1137,7 @@
                     const rect = canvas.getBoundingClientRect();
                     if (this.shooterGame) {
                         this.shooterGame.ship.x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                        this.shooterGame.ship.y = (e.clientY - rect.top) * (canvas.height / rect.height);
                     }
                 };
 
@@ -1120,17 +1146,24 @@
                     const rect = canvas.getBoundingClientRect();
                     if (e.touches.length > 0 && this.shooterGame) {
                         this.shooterGame.ship.x = (e.touches[0].clientX - rect.left) * (canvas.width / rect.width);
+                        this.shooterGame.ship.y = (e.touches[0].clientY - rect.top) * (canvas.height / rect.height);
                     }
                 };
 
                 const btnLeft = document.getElementById('touch-left');
                 const btnRight = document.getElementById('touch-right');
+                const btnUp = document.getElementById('touch-up');
+                const btnDown = document.getElementById('touch-down');
                 const btnFire = document.getElementById('touch-fire');
 
                 btnLeft.ontouchstart = (e) => { e.preventDefault(); this.shooterGame.touchState.left = true; };
                 btnLeft.ontouchend = () => { this.shooterGame.touchState.left = false; };
                 btnRight.ontouchstart = (e) => { e.preventDefault(); this.shooterGame.touchState.right = true; };
                 btnRight.ontouchend = () => { this.shooterGame.touchState.right = false; };
+                btnUp.ontouchstart = (e) => { e.preventDefault(); this.shooterGame.touchState.up = true; };
+                btnUp.ontouchend = () => { this.shooterGame.touchState.up = false; };
+                btnDown.ontouchstart = (e) => { e.preventDefault(); this.shooterGame.touchState.down = true; };
+                btnDown.ontouchend = () => { this.shooterGame.touchState.down = false; };
                 btnFire.ontouchstart = (e) => { e.preventDefault(); this.fireShooterLaser(); };
                 btnFire.onclick = () => { this.fireShooterLaser(); };
 
@@ -1141,8 +1174,14 @@
 
                     if (g.keys['ArrowLeft'] || g.keys['KeyA'] || g.touchState.left) g.ship.x -= g.ship.speed;
                     if (g.keys['ArrowRight'] || g.keys['KeyD'] || g.touchState.right) g.ship.x += g.ship.speed;
+                    if (g.keys['ArrowUp'] || g.keys['KeyW'] || g.touchState.up) g.ship.y -= g.ship.speed;
+                    if (g.keys['ArrowDown'] || g.keys['KeyS'] || g.touchState.down) g.ship.y += g.ship.speed;
+
+                    // Bounds for 2D movement
                     if (g.ship.x < 25) g.ship.x = 25;
                     if (g.ship.x > canvas.width - 25) g.ship.x = canvas.width - 25;
+                    if (g.ship.y < 30) g.ship.y = 30;
+                    if (g.ship.y > canvas.height - 30) g.ship.y = canvas.height - 30;
 
                     g.lasers.forEach(l => l.y -= 10);
                     g.lasers = g.lasers.filter(l => l.y > 0);
@@ -1154,7 +1193,6 @@
                     if (enemyTimer > 55) {
                         enemyTimer = 0;
                         const isDrone = Math.random() > 0.4;
-                        // Generate jagged meteor vertices if asteroid
                         let vertices = [];
                         let size = Math.random() * 8 + 16;
                         if (!isDrone) {
@@ -1212,28 +1250,23 @@
                         if (Math.hypot(el.x - g.ship.x, el.y - g.ship.y) < 22) {
                             audioFX.error();
                             g.enemyLasers.splice(eli, 1);
-                            g.health -= 25;
-                            const healthPct = Math.max(0, g.health);
-                            document.getElementById('shooter-health').innerText = `${healthPct}%`;
-                            document.getElementById('shooter-health-bar').style.width = `${healthPct}%`;
-                            
-                            if (g.health <= 0) {
-                                g.lives--;
-                                document.getElementById('shooter-lives').innerText = g.lives;
-                                if (g.lives <= 0) {
-                                    alert(`Game Over! Dein Highscore: ${g.score}`);
-                                    this.exitSciFiShooter();
-                                } else {
-                                    g.health = 100;
-                                    document.getElementById('shooter-health').innerText = '100%';
-                                    document.getElementById('shooter-health-bar').style.width = '100%';
-                                    alert('Schild zerstört! Leben verloren. Nächstes Leben aktiv!');
-                                }
-                            }
+                            this.applyShieldDamage(25);
                         }
                     });
 
-                    // Clean up off-screen enemies (no penalty for missed meteors/drones)
+                    // Check direct collisions between enemies (asteroids/drones) and player ship
+                    g.enemies.forEach((e, ei) => {
+                        if (Math.hypot(e.x - g.ship.x, e.y - g.ship.y) < e.size + 18) {
+                            audioFX.explosion();
+                            g.enemies.splice(ei, 1);
+                            for(let i=0; i<10; i++) {
+                                g.particles.push({ x: e.x, y: e.y, vx: (Math.random()-0.5)*8, vy: (Math.random()-0.5)*8, life: 20 });
+                            }
+                            const damage = e.type === 'drone' ? 35 : 30;
+                            this.applyShieldDamage(damage);
+                        }
+                    });
+
                     g.enemies = g.enemies.filter(e => e.y < canvas.height + 40);
 
                     g.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
@@ -1283,13 +1316,12 @@
                     ctx.shadowBlur = 8;
                     g.enemyLasers.forEach(el => ctx.fillRect(el.x - 2, el.y, 4, 12));
 
-                    // Draw Enemies (Realistic Starfighter or Jagged Meteor)
+                    // Draw Enemies
                     g.enemies.forEach(e => {
                         ctx.save();
                         ctx.translate(e.x, e.y);
                         ctx.rotate(e.rotation);
                         if (e.type === 'drone') {
-                            // Render actual enemy starfighter spaceship
                             ctx.fillStyle = '#f43f5e';
                             ctx.shadowColor = '#f43f5e';
                             ctx.shadowBlur = 12;
@@ -1303,13 +1335,11 @@
                             ctx.closePath();
                             ctx.fill();
 
-                            // Cockpit glow
                             ctx.fillStyle = '#38bdf8';
                             ctx.beginPath();
                             ctx.arc(0, -2, 3, 0, Math.PI * 2);
                             ctx.fill();
                         } else {
-                            // Render jagged meteor/asteroid shape
                             ctx.fillStyle = '#64748b';
                             ctx.shadowColor = '#475569';
                             ctx.shadowBlur = 6;
@@ -1336,6 +1366,29 @@
                     requestAnimationFrame(loop);
                 };
                 requestAnimationFrame(loop);
+            }
+
+            applyShieldDamage(amount) {
+                if (!this.shooterGame) return;
+                const g = this.shooterGame;
+                g.health -= amount;
+                const healthPct = Math.max(0, g.health);
+                document.getElementById('shooter-health').innerText = `${healthPct}%`;
+                document.getElementById('shooter-health-bar').style.width = `${healthPct}%`;
+                
+                if (g.health <= 0) {
+                    g.lives--;
+                    document.getElementById('shooter-lives').innerText = g.lives;
+                    if (g.lives <= 0) {
+                        alert(`Game Over! Dein Highscore: ${g.score}`);
+                        this.exitSciFiShooter();
+                    } else {
+                        g.health = 100;
+                        document.getElementById('shooter-health').innerText = '100%';
+                        document.getElementById('shooter-health-bar').style.width = '100%';
+                        alert('Schild zerstört! Leben verloren. Nächstes Leben aktiv!');
+                    }
+                }
             }
 
             fireShooterLaser() {
