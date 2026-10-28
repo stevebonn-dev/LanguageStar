@@ -102,7 +102,7 @@
             </div>
 
             <div class="glass-panel rounded-2xl p-6 border border-indigo-500/30">
-                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste (Mehrere Bedeutungen unabhängig testbar)</h3>
+                <h3 class="font-orbitron font-semibold text-lg text-white mb-4">Vokabelliste (Alle Bedeutungen werden einzeln abgefragt)</h3>
                 <div id="vocab-list-container" class="space-y-3"></div>
             </div>
         </div>
@@ -132,7 +132,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-2">Zeitlimit pro Vokabel</label>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Zeitlimit pro Bedeutung</label>
                         <select id="test-timer" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white">
                             <option value="0">Aus (Unendlich)</option>
                             <option value="5">5 Sekunden</option>
@@ -181,7 +181,7 @@
                 <span id="test-direction-label" class="text-xs font-orbitron tracking-widest text-indigo-400 uppercase">Deutsch &rarr; Zielsprache</span>
                 <div class="py-4">
                     <h3 id="test-prompt-word" class="text-3xl font-bold font-orbitron text-white">Wort</h3>
-                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib eine beliebige gültige Bedeutung ein:</p>
+                    <p id="test-sub-prompt" class="text-sm text-gray-400 mt-2">Gib eine Bedeutung ein:</p>
                 </div>
                 <form id="test-answer-form" onsubmit="app.submitAnswer(event)" class="space-y-4">
                     <input type="text" id="test-input-answer" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" autofocus placeholder="Übersetzung..." class="w-full bg-slate-900/90 border border-slate-700 rounded-xl px-5 py-4 text-white text-center text-lg focus:outline-none focus:border-indigo-500 neon-glow">
@@ -411,7 +411,7 @@
                 this.currentChapterId = null;
                 this.activeTest = {
                     chapterId: null, direction: 'de-to-target', order: 'sequential', timerLimit: 10,
-                    hangmanEnabled: false, testQueue: [], currentIndex: 1,
+                    hangmanEnabled: false, testQueue: [], currentIndex: 0,
                     correctCount: 0, wrongCount: 0, wrongVocabList: [], currentTimerInterval: null,
                     timeLeft: 0, hangmanErrors: 0
                 };
@@ -754,13 +754,19 @@
                 let vocabsToTest = subsetVocabs ? [...subsetVocabs] : [...chap.vocabularies];
                 if (order === 'shuffle') vocabsToTest.sort(() => Math.random() - 0.5);
 
-                // Build test queue: each vocabulary item is tested independently. 
-                // Any of its multiple valid meanings can be entered to pass.
-                let testQueue = vocabsToTest.map(vocab => ({
-                    vocabId: vocab.id,
-                    baseWord: vocab.baseWord,
-                    targetMeanings: vocab.targetMeanings
-                }));
+                // Build test queue: EVERY individual meaning of each vocabulary word gets its own test step
+                let testQueue = [];
+                vocabsToTest.forEach(vocab => {
+                    vocab.targetMeanings.forEach((meaning, mIndex) => {
+                        testQueue.push({
+                            vocabId: vocab.id,
+                            baseWord: vocab.baseWord,
+                            targetMeanings: vocab.targetMeanings,
+                            targetMeaningIndex: mIndex,
+                            expectedMeaning: meaning
+                        });
+                    });
+                });
 
                 if (order === 'shuffle') testQueue.sort(() => Math.random() - 0.5);
 
@@ -801,13 +807,8 @@
                 let chap = this.db.chapters.find(c => c.id === this.currentChapterId);
                 let dir = this.activeTest.direction === 'mixed' ? (Math.random() > 0.5 ? 'de-to-target' : 'target-to-de') : this.activeTest.direction;
 
-                // When testing target-to-de, pick one representative meaning to prompt
-                if (dir === 'target-to-de' && !item.selectedPromptMeaning) {
-                    item.selectedPromptMeaning = item.targetMeanings[Math.floor(Math.random() * item.targetMeanings.length)];
-                }
-
-                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? item.baseWord : item.selectedPromptMeaning;
-                document.getElementById('test-sub-prompt').innerText = (dir === 'de-to-target') ? `Übersetze ins ${chap.targetLanguage} (Mehrere Bedeutungen möglich)` : `Übersetze ins Deutsche`;
+                document.getElementById('test-prompt-word').innerText = (dir === 'de-to-target') ? item.baseWord : item.expectedMeaning;
+                document.getElementById('test-sub-prompt').innerText = (dir === 'de-to-target') ? `Übersetze ins ${chap.targetLanguage} (Bedeutung ${item.targetMeaningIndex + 1} von ${item.targetMeanings.length})` : `Übersetze ins Deutsche`;
                 document.getElementById('test-direction-label').innerText = (dir === 'de-to-target') ? `Deutsch &rarr; ${chap.targetLanguage}` : `${chap.targetLanguage} &rarr; Deutsch`;
 
                 document.getElementById('test-input-answer').value = '';
@@ -852,7 +853,7 @@
 
                 const fb = document.getElementById('test-feedback-area');
                 fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Gültige Bedeutungen: <strong>${item.targetMeanings.join(', ')}</strong>`;
+                fb.innerHTML = `<strong>Zeit abgelaufen!</strong> Erwartete Bedeutung war: <strong>${item.expectedMeaning}</strong> (Alle gültigen Bedeutungen: ${item.targetMeanings.join(', ')})`;
                 fb.classList.remove('hidden');
 
                 setTimeout(() => {
@@ -871,7 +872,8 @@
 
                 let isCorrect = false;
                 if (dir === 'de-to-target') {
-                    // Accept input if it matches ANY of the recorded valid target meanings (regardless of sequence)
+                    // Flexible check: User can enter ANY valid meaning of this word in any order, 
+                    // and if it matches any of the recorded target meanings, it's correct!
                     isCorrect = item.targetMeanings.some(m => m.trim().toLowerCase() === inputVal);
                 } else {
                     isCorrect = (inputVal === item.baseWord.trim().toLowerCase());
@@ -906,7 +908,7 @@
                     }
 
                     fb.className = "p-4 rounded-xl text-sm font-medium bg-red-900/30 border border-red-500/50 text-red-300";
-                    fb.innerHTML = `<strong>Falsch!</strong> Gültige Bedeutungen waren: <strong>${item.targetMeanings.join(', ')}</strong>`;
+                    fb.innerHTML = `<strong>Falsch!</strong> Gesuchte Bedeutung war: <strong>${item.expectedMeaning}</strong> (Alle gültigen Bedeutungen: ${item.targetMeanings.join(', ')})`;
                     fb.classList.remove('hidden');
                     setTimeout(() => {
                         this.activeTest.currentIndex++;
@@ -956,11 +958,27 @@
                 document.getElementById('summary-correct').innerText = this.activeTest.correctCount;
                 document.getElementById('summary-wrong').innerText = this.activeTest.wrongCount;
 
-                let grade = (failedByHangman || accuracy < 50) ? 6 : (accuracy >= 95 ? 1 : (accuracy >= 85 ? 2 : (accuracy >= 75 ? 3 : (accuracy >= 60 ? 4 : 5))));
-                document.getElementById('summary-grade-badge').innerText = grade;
-                document.getElementById('summary-subtitle').innerText = grade === 1 ? "Hervorragende Leistung! 🏆" : "Gut gemacht!";
+                // German Gymnasium Hessen Grading Scale (Realistic percentage thresholds):
+                // Note 1: >= 90%
+                // Note 2: >= 75%
+                // Note 3: >= 60%
+                // Note 4: >= 45%
+                // Note 5: >= 20%
+                // Note 6: < 20%
+                let grade = 6;
+                if (!failedByHangman) {
+                    if (accuracy >= 90) grade = 1;
+                    else if (accuracy >= 75) grade = 2;
+                    else if (accuracy >= 60) grade = 3;
+                    else if (accuracy >= 45) grade = 4;
+                    else if (accuracy >= 20) grade = 5;
+                    else grade = 6;
+                }
 
-                document.getElementById('shooter-unlock-box').classList.toggle('hidden', !(accuracy > 90 && !failedByHangman));
+                document.getElementById('summary-grade-badge').innerText = grade;
+                document.getElementById('summary-subtitle').innerText = grade === 1 ? "Hervorragende Leistung! 🏆" : (grade <= 4 ? "Bestanden! Gut gemacht!" : "Nicht bestanden. Übe die Fehler noch einmal!");
+
+                document.getElementById('shooter-unlock-box').classList.toggle('hidden', !(accuracy >= 90 && !failedByHangman));
                 document.getElementById('btn-retry-mistakes').classList.toggle('hidden', this.activeTest.wrongVocabList.length === 0);
             }
 
