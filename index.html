@@ -240,10 +240,11 @@
         <!-- SCREEN 6: SCI-FI SHOOTER -->
         <div id="screen-shooter" class="space-y-4 hidden max-w-3xl mx-auto">
             <div class="glass-panel rounded-2xl p-4 flex items-center justify-between border border-cyan-500/40 neon-glow-cyan">
-                <div class="flex items-center space-x-4">
-                    <span class="font-orbitron font-bold text-cyan-400 text-sm">★ STARSHIP DEFENDER</span>
+                <div class="flex items-center space-x-3">
+                    <span class="font-orbitron font-bold text-cyan-400 text-sm">★ DEFENDER</span>
                     <span class="text-xs text-gray-300">Score: <span id="shooter-score" class="text-white font-bold">0</span></span>
-                    <span class="text-xs text-gray-300">Schilder: <span id="shooter-health" class="text-emerald-400 font-bold">100%</span></span>
+                    <span class="text-xs text-gray-300">Schild: <span id="shooter-health" class="text-emerald-400 font-bold">100%</span></span>
+                    <span class="text-xs text-gray-300">Leben: <span id="shooter-lives" class="text-cyan-300 font-bold">2</span></span>
                 </div>
                 <button onclick="app.exitSciFiShooter()" class="px-4 py-1.5 rounded-xl bg-red-600/30 border border-red-500/50 text-red-300 text-xs hover:bg-red-600/50">Beenden</button>
             </div>
@@ -1014,7 +1015,7 @@
             }
 
             failTestByHangman() {
-                alert("Hangman ist komplett! Test nicht bestanden.");
+                if (this.activeTest.currentTimerInterval) clearInterval(this.activeTest.currentTimerInterval);
                 this.finishTestSession(true);
             }
 
@@ -1042,7 +1043,9 @@
                 document.getElementById('summary-grade-badge').innerText = grade;
                 
                 let subTitleText = "";
-                if (quitEarly) {
+                if (failedByHangman) {
+                    subTitleText = "Test beendet: Hangman-Limit erreicht. Hier ist Ihre Auswertung:";
+                } else if (quitEarly) {
                     subTitleText = this.db.appLanguage === 'en' ? "Test quit early. Here is your result up to this point." : "Test vorzeitig abgebrochen. Hier ist deine Auswertung bis zu diesem Punkt.";
                 } else if (grade === 1) {
                     subTitleText = "Hervorragende Leistung! 🏆";
@@ -1068,11 +1071,15 @@
                 const ctx = canvas.getContext('2d');
 
                 this.shooterGame = {
-                    active: true, score: 0, health: 100,
+                    active: true, score: 0, health: 100, lives: 2,
                     ship: { x: 350, y: 320, speed: 7 },
-                    lasers: [], enemies: [], particles: [],
+                    lasers: [], enemyLasers: [], enemies: [], particles: [],
                     keys: {}, touchState: { left: false, right: false }
                 };
+
+                document.getElementById('shooter-health').innerText = '100%';
+                document.getElementById('shooter-lives').innerText = '2';
+                document.getElementById('shooter-score').innerText = '0';
 
                 window.onkeydown = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = true; if (e.code === 'Space') { e.preventDefault(); this.fireShooterLaser(); } };
                 window.onkeyup = (e) => { if (this.shooterGame) this.shooterGame.keys[e.code] = false; };
@@ -1116,20 +1123,36 @@
                     g.lasers.forEach(l => l.y -= 10);
                     g.lasers = g.lasers.filter(l => l.y > 0);
 
+                    g.enemyLasers.forEach(el => el.y += 5);
+                    g.enemyLasers = g.enemyLasers.filter(el => el.y < canvas.height);
+
                     enemyTimer++;
-                    if (enemyTimer > 30) {
+                    if (enemyTimer > 55) {
                         enemyTimer = 0;
+                        const isDrone = Math.random() > 0.4;
                         g.enemies.push({
                             x: Math.random() * (canvas.width - 60) + 30,
                             y: -25,
-                            speed: Math.random() * 2 + 2,
+                            speed: Math.random() * 1.5 + 1.2,
                             size: Math.random() * 8 + 14,
-                            type: Math.random() > 0.5 ? 'drone' : 'asteroid'
+                            type: isDrone ? 'drone' : 'asteroid',
+                            lastShot: 0
                         });
                     }
 
-                    g.enemies.forEach(e => e.y += e.speed);
+                    g.enemies.forEach(e => {
+                        e.y += e.speed;
+                        // Drones periodically shoot at the player
+                        if (e.type === 'drone') {
+                            e.lastShot++;
+                            if (e.lastShot > 75) {
+                                e.lastShot = 0;
+                                g.enemyLasers.push({ x: e.x, y: e.y + 10 });
+                            }
+                        }
+                    });
 
+                    // Check player laser hits on enemies
                     g.lasers.forEach((l, li) => {
                         g.enemies.forEach((e, ei) => {
                             if (Math.hypot(l.x - e.x, l.y - e.y) < e.size + 8) {
@@ -1147,21 +1170,34 @@
                         });
                     });
 
-                    g.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
-                    g.particles = g.particles.filter(p => p.life > 0);
-
-                    g.enemies.forEach((e, ei) => {
-                        if (e.y > canvas.height) {
-                            g.enemies.splice(ei, 1);
-                            g.health -= 15;
-                            document.getElementById('shooter-health').innerText = `${g.health}%`;
+                    // Check enemy laser hits on player ship
+                    g.enemyLasers.forEach((el, eli) => {
+                        if (Math.hypot(el.x - g.ship.x, el.y - g.ship.y) < 22) {
+                            audioFX.error();
+                            g.enemyLasers.splice(eli, 1);
+                            g.health -= 25;
+                            document.getElementById('shooter-health').innerText = `${Math.max(0, g.health)}%`;
+                            
                             if (g.health <= 0) {
-                                audioFX.error();
-                                alert(`Game Over! Dein Highscore: ${g.score}`);
-                                this.exitSciFiShooter();
+                                g.lives--;
+                                document.getElementById('shooter-lives').innerText = g.lives;
+                                if (g.lives <= 0) {
+                                    alert(`Game Over! Dein Highscore: ${g.score}`);
+                                    this.exitSciFiShooter();
+                                } else {
+                                    g.health = 100;
+                                    document.getElementById('shooter-health').innerText = '100%';
+                                    alert('Schild zerstört! Leben verloren. Nächstes Leben aktiv!');
+                                }
                             }
                         }
                     });
+
+                    // Clean up off-screen enemies (no penalty for missed meteors/drones)
+                    g.enemies = g.enemies.filter(e => e.y < canvas.height + 40);
+
+                    g.particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life--; });
+                    g.particles = g.particles.filter(p => p.life > 0);
 
                     ctx.fillStyle = '#030712';
                     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -1173,6 +1209,7 @@
                         ctx.fillRect(sx, sy, 1.8, 1.8);
                     }
 
+                    // Draw Player Ship
                     ctx.save();
                     ctx.translate(g.ship.x, g.ship.y);
                     ctx.fillStyle = '#06b6d4';
@@ -1194,11 +1231,19 @@
                     ctx.fill();
                     ctx.restore();
 
+                    // Draw Player Lasers
                     ctx.fillStyle = '#22d3ee';
                     ctx.shadowColor = '#22d3ee';
                     ctx.shadowBlur = 10;
                     g.lasers.forEach(l => ctx.fillRect(l.x - 2.5, l.y, 5, 14));
 
+                    // Draw Enemy Lasers
+                    ctx.fillStyle = '#f43f5e';
+                    ctx.shadowColor = '#f43f5e';
+                    ctx.shadowBlur = 8;
+                    g.enemyLasers.forEach(el => ctx.fillRect(el.x - 2, el.y, 4, 12));
+
+                    // Draw Enemies
                     g.enemies.forEach(e => {
                         ctx.save();
                         ctx.translate(e.x, e.y);
